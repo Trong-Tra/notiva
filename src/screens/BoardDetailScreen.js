@@ -9,8 +9,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import DraggableFlatList from 'react-native-draggable-flatlist';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { FlatList } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors } from '../constants/colors';
 import { formatDate, isOverdue } from '../utils/helpers';
@@ -122,6 +121,24 @@ export default function BoardDetailScreen({ route, navigation }) {
     ]);
   };
 
+  const moveCardUp = (listId, cardId) => {
+    const list = board.lists.find((l) => l.id === listId);
+    const idx = list.cards.findIndex((c) => c.id === cardId);
+    if (idx <= 0) return;
+    const newCards = [...list.cards];
+    [newCards[idx - 1], newCards[idx]] = [newCards[idx], newCards[idx - 1]];
+    reorderCards(boardId, listId, newCards);
+  };
+
+  const moveCardDown = (listId, cardId) => {
+    const list = board.lists.find((l) => l.id === listId);
+    const idx = list.cards.findIndex((c) => c.id === cardId);
+    if (idx < 0 || idx >= list.cards.length - 1) return;
+    const newCards = [...list.cards];
+    [newCards[idx], newCards[idx + 1]] = [newCards[idx + 1], newCards[idx]];
+    reorderCards(boardId, listId, newCards);
+  };
+
   const openMoveModal = (listId, card) => {
     setCardToMove({ listId, card });
     setMoveModalVisible(true);
@@ -139,16 +156,16 @@ export default function BoardDetailScreen({ route, navigation }) {
     setCardToMove(null);
   };
 
-  const renderCard = ({ item: card, drag, isActive }) => {
+  const renderCard = ({ item: card }) => {
     const listId = card.listId;
     return (
       <TouchableOpacity
         style={[
           styles.card,
-          isActive && styles.cardActive,
+  
           card.isCompleted && styles.cardCompleted,
         ]}
-        onLongPress={drag}
+
         onPress={() =>
           navigation.navigate('CardDetail', { boardId, listId, cardId: card.id })
         }
@@ -179,16 +196,22 @@ export default function BoardDetailScreen({ route, navigation }) {
           )}
         </View>
         <View style={styles.cardActions}>
-          <TouchableOpacity onPress={() => openCardModal(listId, card)}>
-            <Text style={styles.cardActionText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => openMoveModal(listId, card)}>
-            <Text style={styles.cardActionText}>Move</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => confirmDeleteCard(listId, card.id)}>
-            <Text style={[styles.cardActionText, styles.deleteText]}>Del</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => openCardModal(listId, card)}>
+          <Text style={styles.cardActionText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => openMoveModal(listId, card)}>
+          <Text style={styles.cardActionText}>Move</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => moveCardUp(listId, card.id)}>
+          <Text style={styles.cardActionText}>↑</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => moveCardDown(listId, card.id)}>
+          <Text style={styles.cardActionText}>↓</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => confirmDeleteCard(listId, card.id)}>
+          <Text style={[styles.cardActionText, styles.deleteText]}>Del</Text>
+        </TouchableOpacity>
+      </View>
       </TouchableOpacity>
     );
   };
@@ -215,11 +238,10 @@ export default function BoardDetailScreen({ route, navigation }) {
         </View>
       </View>
       <View style={styles.listContent}>
-        <DraggableFlatList
+        <FlatList
           data={list.cards}
           keyExtractor={(item) => item.id}
           renderItem={renderCard}
-          onDragEnd={({ data }) => reorderCards(boardId, list.id, data)}
           contentContainerStyle={styles.cardList}
         />
       </View>
@@ -230,7 +252,7 @@ export default function BoardDetailScreen({ route, navigation }) {
   );
 
   return (
-    <GestureHandlerRootView style={[styles.container, { backgroundColor: board.backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor: board.backgroundColor }]}>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>← Back</Text>
@@ -320,7 +342,7 @@ export default function BoardDetailScreen({ route, navigation }) {
           </View>
         </View>
       </Modal>
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
@@ -406,10 +428,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  cardActive: {
-    opacity: 0.8,
-    transform: [{ scale: 1.02 }],
-  },
+
   cardCompleted: {
     opacity: 0.7,
   },

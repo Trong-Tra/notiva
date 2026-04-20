@@ -28,5 +28,8 @@
     "react-native-screens": "~4.4.0",
     "uuid": "^9.0.1"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "babel-preset-expo": "^54.0.10"
+  }
 }

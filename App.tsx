@@ -57,7 +57,6 @@ function MainTabs() {
         component={HomeScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Home" />,
-          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 14, fontWeight: '800', color: focused ? '#0052CC' : '#9CA3AF' }}>H</Text>,
         }}
       />
       <Tab.Screen
@@ -65,7 +64,6 @@ function MainTabs() {
         component={SpaceStackNavigator}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Space" />,
-          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 14, fontWeight: '800', color: focused ? '#0052CC' : '#9CA3AF' }}>S</Text>,
         }}
       />
       <Tab.Screen
@@ -73,7 +71,6 @@ function MainTabs() {
         component={DashboardScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Dashboard" />,
-          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 14, fontWeight: '800', color: focused ? '#0052CC' : '#9CA3AF' }}>D</Text>,
         }}
       />
       <Tab.Screen
@@ -81,7 +78,6 @@ function MainTabs() {
         component={CalendarScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Calendar" />,
-          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 14, fontWeight: '800', color: focused ? '#0052CC' : '#9CA3AF' }}>C</Text>,
         }}
       />
       <Tab.Screen
@@ -89,7 +85,6 @@ function MainTabs() {
         component={NotificationsScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Alerts" />,
-          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 14, fontWeight: '800', color: focused ? '#0052CC' : '#9CA3AF' }}>A</Text>,
         }}
       />
     </Tab.Navigator>

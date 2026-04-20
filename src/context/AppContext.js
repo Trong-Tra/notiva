@@ -7,6 +7,8 @@ const AppContext = createContext();
 
 const initialState = {
   boards: [],
+  space: null,
+  onboardingComplete: false,
   loading: true,
 };
 
@@ -14,6 +16,10 @@ function appReducer(state, action) {
   switch (action.type) {
     case 'SET_BOARDS':
       return { ...state, boards: action.payload, loading: false };
+    case 'SET_SPACE':
+      return { ...state, space: action.payload };
+    case 'SET_ONBOARDING':
+      return { ...state, onboardingComplete: action.payload };
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     case 'ADD_BOARD':
@@ -165,7 +171,7 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   useEffect(() => {
-    loadBoards();
+    loadData();
     notificationService.requestPermissions();
   }, []);
 
@@ -175,9 +181,21 @@ export function AppProvider({ children }) {
     }
   }, [state.boards]);
 
-  const loadBoards = async () => {
-    const boards = await storage.getBoards();
+  useEffect(() => {
+    if (state.space) {
+      storage.saveSpace(state.space);
+    }
+  }, [state.space]);
+
+  const loadData = async () => {
+    const [boards, space, onboardingComplete] = await Promise.all([
+      storage.getBoards(),
+      storage.getSpace(),
+      storage.getOnboardingComplete(),
+    ]);
     dispatch({ type: 'SET_BOARDS', payload: boards });
+    dispatch({ type: 'SET_SPACE', payload: space });
+    dispatch({ type: 'SET_ONBOARDING', payload: onboardingComplete });
   };
 
   const getBoard = (boardId) => state.boards.find((b) => b.id === boardId);
@@ -190,11 +208,22 @@ export function AppProvider({ children }) {
     return list?.cards.find((c) => c.id === cardId);
   };
 
+  const createSpace = (name) => {
+    const space = { name: name.trim(), createdAt: Date.now() };
+    dispatch({ type: 'SET_SPACE', payload: space });
+    return space;
+  };
+
+  const completeOnboarding = async () => {
+    await storage.setOnboardingComplete(true);
+    dispatch({ type: 'SET_ONBOARDING', payload: true });
+  };
+
   const createBoard = (title, backgroundColor) => {
     const board = {
       id: generateId(),
       title,
-      backgroundColor: backgroundColor || '#0079BF',
+      backgroundColor: backgroundColor || '#0052CC',
       isStarred: false,
       createdAt: Date.now(),
       lists: [],
@@ -318,14 +347,35 @@ export function AppProvider({ children }) {
     return cards.sort((a, b) => a.dueDate - b.dueDate);
   };
 
+  const getStats = () => {
+    let totalCards = 0;
+    let completedCards = 0;
+    let overdueCards = 0;
+    const now = Date.now();
+    state.boards.forEach((board) => {
+      board.lists.forEach((list) => {
+        list.cards.forEach((card) => {
+          totalCards++;
+          if (card.isCompleted) completedCards++;
+          if (card.dueDate && !card.isCompleted && card.dueDate < now) overdueCards++;
+        });
+      });
+    });
+    return { totalCards, completedCards, overdueCards, totalBoards: state.boards.length };
+  };
+
   return (
     <AppContext.Provider
       value={{
         boards: state.boards,
+        space: state.space,
+        onboardingComplete: state.onboardingComplete,
         loading: state.loading,
         getBoard,
         getList,
         getCard,
+        createSpace,
+        completeOnboarding,
         createBoard,
         updateBoard,
         deleteBoard,
@@ -340,6 +390,7 @@ export function AppProvider({ children }) {
         moveCard,
         reorderCards,
         getAllCardsWithDueDates,
+        getStats,
       }}
     >
       {children}

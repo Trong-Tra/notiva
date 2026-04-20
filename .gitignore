@@ -39,3 +39,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+./context.md
+./skills
+./DEVELOPMENT.md
+./development_status.md

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { storage } from '../storage/storage';
 import { colors } from '../constants/colors';
 import { isOverdue, isToday } from '../utils/helpers';
 import { HomeScreenNavigationProp } from '../types/navigation';
@@ -90,7 +91,26 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           </View>
         )}
 
-        <View style={{ height: 20 }} />
+        <TouchableOpacity
+          style={styles.resetBtn}
+          onPress={() =>
+            Alert.alert('Reset App Data', 'This will wipe all boards, tasks, and settings. Are you sure?', [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Reset',
+                style: 'destructive',
+                onPress: async () => {
+                  await storage.clearAll();
+                  Alert.alert('Data Wiped', 'Please close and reopen the app to start fresh.');
+                },
+              },
+            ])
+          }
+        >
+          <Text style={styles.resetText}>Reset App Data</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -122,4 +142,6 @@ const styles = StyleSheet.create({
   recentTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   recentMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   recentArrow: { fontSize: 20, color: colors.textMuted, fontWeight: '300' },
+  resetBtn: { marginTop: 20, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, borderWidth: 1, borderColor: '#E5E7EB' },
+  resetText: { fontSize: 13, color: colors.error, fontWeight: '600' },
 });

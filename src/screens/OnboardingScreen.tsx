@@ -30,7 +30,6 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
 
   const handleBoardSubmit = () => {
     if (!boardTitle.trim()) return;
-    createBoard(boardTitle.trim(), boardColor);
     setStep(3);
   };
 

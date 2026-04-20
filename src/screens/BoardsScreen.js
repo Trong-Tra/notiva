@@ -23,7 +23,7 @@ export default function BoardsScreen({ navigation }) {
   const [selectedColor, setSelectedColor] = useState(boardBackgroundColors[0]);
 
   const starredBoards = boards.filter((b) => b.isStarred);
-  const allBoards = boards.filter((b) => !b.isStarred);
+  const allBoards = boards;
 
   const openCreate = () => {
     setEditingBoard(null);
@@ -56,166 +56,157 @@ export default function BoardsScreen({ navigation }) {
     ]);
   };
 
-  const renderBoardCard = (board, isSmall) => (
+  const renderBoardCard = (board) => (
     <TouchableOpacity
-      style={[
-        styles.boardCard,
-        isSmall && styles.boardCardSmall,
-        { backgroundColor: board.backgroundColor },
-      ]}
+      style={styles.boardCard}
       onPress={() => navigation.navigate('BoardDetail', { boardId: board.id })}
       onLongPress={() => openEdit(board)}
-      activeOpacity={0.85}
+      activeOpacity={0.7}
     >
-      <View style={styles.boardCardContent}>
+      <View style={[styles.colorStrip, { backgroundColor: board.backgroundColor }]} />
+      <View style={styles.boardCardBody}>
         <Text style={styles.boardTitle} numberOfLines={2}>
           {board.title}
         </Text>
-      </View>
-      <TouchableOpacity
-        style={styles.starBtn}
-        onPress={() => toggleStarBoard(board.id)}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <Text style={[styles.star, board.isStarred && styles.starActive]}>
-          {board.isStarred ? '★' : '☆'}
-        </Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
-
-  const renderCreateCard = (isSmall) => (
-    <TouchableOpacity
-      style={[styles.createCard, isSmall && styles.createCardSmall]}
-      onPress={openCreate}
-      activeOpacity={0.7}
-    >
-      <View style={styles.createCardInner}>
-        <Text style={styles.createCardPlus}>+</Text>
-        <Text style={styles.createCardText}>Create new board</Text>
+        <View style={styles.boardMeta}>
+          <Text style={styles.boardMetaText}>
+            {board.lists.length} list{board.lists.length !== 1 ? 's' : ''} ·{' '}
+            {board.lists.reduce((acc, l) => acc + l.cards.length, 0)} card
+            {board.lists.reduce((acc, l) => acc + l.cards.length, 0) !== 1 ? 's' : ''}
+          </Text>
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              toggleStarBoard(board.id);
+            }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={[styles.star, board.isStarred && styles.starActive]}>
+              {board.isStarred ? '★' : '☆'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Boards</Text>
-          <Text style={styles.headerSubtitle}>{boards.length} workspace{boards.length !== 1 ? 's' : ''}</Text>
-        </View>
+        <Text style={styles.headerTitle}>Boards</Text>
+        <TouchableOpacity style={styles.headerBtn} onPress={openCreate}>
+          <Text style={styles.headerBtnText}>+ New</Text>
+        </TouchableOpacity>
       </View>
 
       {boards.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconCircle}>
+          <View style={styles.emptyBox}>
             <Text style={styles.emptyIcon}>📋</Text>
+            <Text style={styles.emptyTitle}>No boards yet</Text>
+            <Text style={styles.emptyDesc}>
+              Create a board to start organizing your tasks and projects.
+            </Text>
+            <TouchableOpacity style={styles.emptyBtn} onPress={openCreate}>
+              <Text style={styles.emptyBtnText}>Create Board</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.emptyTitle}>Welcome to your workspace</Text>
-          <Text style={styles.emptyDesc}>
-            Boards keep your tasks organized. Create your first board to get started.
-          </Text>
-          <TouchableOpacity style={styles.emptyButton} onPress={openCreate}>
-            <Text style={styles.emptyButtonText}>Create Your First Board</Text>
-          </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          {/* Starred Section */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
           {starredBoards.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>⭐ Starred</Text>
+              <Text style={styles.sectionLabel}>Starred</Text>
               <FlatList
                 data={starredBoards}
                 keyExtractor={(item) => item.id}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.horizontalList}
-                renderItem={({ item }) => renderBoardCard(item, true)}
+                renderItem={({ item }) => (
+                  <View style={styles.horizontalItem}>{renderBoardCard(item)}</View>
+                )}
               />
             </View>
           )}
 
-          {/* All Boards Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📋 Your Boards</Text>
-            <View style={styles.boardGrid}>
-              {allBoards.map((board) => (
-                <View key={board.id} style={styles.gridItem}>
-                  {renderBoardCard(board, false)}
-                </View>
-              ))}
-              <View key="create" style={styles.gridItem}>
-                {renderCreateCard(false)}
+            <Text style={styles.sectionLabel}>All Boards</Text>
+            {allBoards.map((board) => (
+              <View key={board.id} style={styles.listItem}>
+                {renderBoardCard(board)}
               </View>
-            </View>
+            ))}
           </View>
+
+          <TouchableOpacity style={styles.footerCreate} onPress={openCreate}>
+            <Text style={styles.footerCreatePlus}>+</Text>
+            <Text style={styles.footerCreateText}>Create new board</Text>
+          </TouchableOpacity>
         </ScrollView>
       )}
 
-      {/* Create/Edit Modal */}
       <Modal visible={modalVisible} animationType="fade" transparent statusBarTranslucent>
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.modalDismiss} onPress={() => setModalVisible(false)} />
           <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>
-              {editingBoard ? 'Edit Board' : 'Create Board'}
+              {editingBoard ? 'Edit Board' : 'New Board'}
             </Text>
 
-            <Text style={styles.inputLabel}>Board Title</Text>
+            <Text style={styles.modalLabel}>Title</Text>
             <TextInput
-              style={styles.input}
-              placeholder="e.g. University Project"
-              placeholderTextColor={colors.textSecondary}
+              style={styles.modalInput}
+              placeholder="Board name"
+              placeholderTextColor="#9CA3AF"
               value={title}
               onChangeText={setTitle}
               autoFocus
               maxLength={40}
             />
 
-            <Text style={styles.inputLabel}>Background</Text>
-            <View style={styles.colorGrid}>
+            <Text style={styles.modalLabel}>Accent Color</Text>
+            <View style={styles.colorRow}>
               {boardBackgroundColors.map((color) => (
                 <TouchableOpacity
                   key={color}
                   style={[
-                    styles.colorCircle,
+                    styles.colorDot,
                     { backgroundColor: color },
-                    selectedColor === color && styles.colorSelected,
+                    selectedColor === color && styles.colorDotActive,
                   ]}
                   onPress={() => setSelectedColor(color)}
-                >
-                  {selectedColor === color && <Text style={styles.colorCheck}>✓</Text>}
-                </TouchableOpacity>
+                />
               ))}
             </View>
 
             <View style={styles.modalActions}>
               {editingBoard && (
                 <TouchableOpacity
-                  style={styles.deleteBtn}
                   onPress={() => {
                     setModalVisible(false);
                     confirmDelete(editingBoard);
                   }}
                 >
-                  <Text style={styles.deleteBtnText}>Delete</Text>
+                  <Text style={styles.modalDelete}>Delete</Text>
                 </TouchableOpacity>
               )}
-              <View style={styles.actionSpacer} />
-              <TouchableOpacity style={styles.secondaryBtn} onPress={() => setModalVisible(false)}>
-                <Text style={styles.secondaryBtnText}>Cancel</Text>
+              <View style={{ flex: 1 }} />
+              <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.primaryBtn, !title.trim() && styles.primaryBtnDisabled]}
+                style={[styles.modalConfirm, !title.trim() && styles.modalConfirmDisabled]}
                 onPress={saveBoard}
                 disabled={!title.trim()}
               >
-                <Text style={styles.primaryBtnText}>
+                <Text style={styles.modalConfirmText}>
                   {editingBoard ? 'Save' : 'Create'}
                 </Text>
               </TouchableOpacity>
@@ -227,292 +218,261 @@ export default function BoardsScreen({ navigation }) {
   );
 }
 
-const CARD_RADIUS = 12;
-const GAP = 12;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#FFFFFF',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.textPrimary,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#111827',
     letterSpacing: -0.5,
   },
-  headerSubtitle: {
-    fontSize: 15,
-    color: colors.textSecondary,
-    marginTop: 4,
+  headerBtn: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  headerBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    padding: 20,
     paddingBottom: 40,
   },
   section: {
-    marginTop: 20,
+    marginBottom: 28,
   },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textSecondary,
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9CA3AF',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 12,
   },
   horizontalList: {
-    gap: GAP,
     paddingRight: 20,
+    gap: 12,
   },
-  boardGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: GAP,
+  horizontalItem: {
+    width: 280,
   },
-  gridItem: {
-    width: '47%',
-    minWidth: 150,
+  listItem: {
+    marginBottom: 10,
   },
   boardCard: {
-    borderRadius: CARD_RADIUS,
-    height: 110,
-    padding: 14,
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
+    flexDirection: 'row',
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    overflow: 'hidden',
   },
-  boardCardSmall: {
-    width: 160,
-    height: 100,
+  colorStrip: {
+    width: 5,
   },
-  boardCardContent: {
+  boardCardBody: {
     flex: 1,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   boardTitle: {
-    color: '#fff',
     fontSize: 16,
-    fontWeight: '700',
-    textShadowColor: 'rgba(0,0,0,0.25)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontWeight: '600',
+    color: '#111827',
+    flex: 1,
+    marginRight: 12,
   },
-  starBtn: {
-    alignSelf: 'flex-start',
+  boardMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  boardMetaText: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
   star: {
     fontSize: 18,
-    color: 'rgba(255,255,255,0.5)',
+    color: '#D1D5DB',
   },
   starActive: {
-    color: '#F2D600',
+    color: '#F59E0B',
   },
-  createCard: {
-    borderRadius: CARD_RADIUS,
-    height: 110,
-    backgroundColor: '#F0F2F5',
-    borderWidth: 2,
-    borderColor: '#D0D5DD',
-    borderStyle: 'dashed',
+  footerCreate: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  createCardSmall: {
-    width: 160,
-    height: 100,
-  },
-  createCardInner: {
-    alignItems: 'center',
-  },
-  createCardPlus: {
-    fontSize: 28,
-    color: colors.textSecondary,
-    fontWeight: '300',
-    lineHeight: 32,
-  },
-  createCardText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: '600',
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
     marginTop: 4,
+  },
+  footerCreatePlus: {
+    fontSize: 20,
+    color: '#9CA3AF',
+    fontWeight: '300',
+    marginRight: 8,
+  },
+  footerCreateText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
-    marginTop: -40,
+    paddingHorizontal: 32,
   },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#E4E8EC',
-    justifyContent: 'center',
+  emptyBox: {
     alignItems: 'center',
-    marginBottom: 20,
   },
   emptyIcon: {
-    fontSize: 36,
+    fontSize: 48,
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 8,
-    textAlign: 'center',
+    color: '#111827',
+    marginBottom: 6,
   },
   emptyDesc: {
     fontSize: 15,
-    color: colors.textSecondary,
+    color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
   },
-  emptyButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
+  emptyBtn: {
+    backgroundColor: '#111827',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 10,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
-  emptyButtonText: {
+  emptyBtnText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'flex-end',
   },
   modalDismiss: {
     flex: 1,
   },
   modalSheet: {
-    backgroundColor: colors.surface,
+    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingBottom: 36,
-    paddingTop: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 10,
+    paddingTop: 10,
   },
   modalHandle: {
-    width: 40,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: '#D0D5DD',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E5E7EB',
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: '#111827',
     marginBottom: 20,
   },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+  modalLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: colors.background,
+  modalInput: {
+    backgroundColor: '#F9FAFB',
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     padding: 14,
     fontSize: 16,
-    color: colors.textPrimary,
+    color: '#111827',
     marginBottom: 20,
   },
-  colorGrid: {
+  colorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
     marginBottom: 24,
   },
-  colorCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  colorDot: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
-  colorSelected: {
+  colorDotActive: {
     borderWidth: 3,
     borderColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 4,
-  },
-  colorCheck: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0,0,0,0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    elevation: 3,
   },
   modalActions: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  deleteBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-  },
-  deleteBtnText: {
-    color: colors.error,
+  modalDelete: {
+    color: '#EF4444',
     fontSize: 15,
     fontWeight: '600',
   },
-  actionSpacer: {
-    flex: 1,
+  modalCancel: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginRight: 8,
   },
-  secondaryBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  secondaryBtnText: {
-    color: colors.textSecondary,
+  modalCancelText: {
+    color: '#6B7280',
     fontSize: 15,
     fontWeight: '600',
   },
-  primaryBtn: {
-    backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+  modalConfirm: {
+    backgroundColor: '#111827',
+    paddingVertical: 10,
+    paddingHorizontal: 22,
     borderRadius: 10,
   },
-  primaryBtnDisabled: {
-    backgroundColor: '#A0C4E0',
+  modalConfirmDisabled: {
+    backgroundColor: '#D1D5DB',
   },
-  primaryBtnText: {
+  modalConfirmText: {
     color: '#fff',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

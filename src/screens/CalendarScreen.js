@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
+  SafeAreaView,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useApp } from '../context/AppContext';
@@ -14,7 +15,6 @@ import { formatDate, formatTime } from '../utils/helpers';
 
 export default function CalendarScreen({ navigation, route }) {
   const { boards } = useApp();
-  const boardId = route?.params?.boardId;
   const [selectedDate, setSelectedDate] = useState(null);
   const [dayTasks, setDayTasks] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -24,7 +24,6 @@ export default function CalendarScreen({ navigation, route }) {
     const cards = [];
 
     boards.forEach((board) => {
-      if (boardId && board.id !== boardId) return;
       board.lists.forEach((list) => {
         list.cards.forEach((card) => {
           if (card.dueDate) {
@@ -70,7 +69,6 @@ export default function CalendarScreen({ navigation, route }) {
 
   const navigateToCard = (card) => {
     setModalVisible(false);
-    // Find the actual listId from the card
     let foundListId = card.listId;
     let foundBoardId = null;
     boards.forEach((b) => {
@@ -82,38 +80,29 @@ export default function CalendarScreen({ navigation, route }) {
       });
     });
     if (foundBoardId) {
-      navigation.navigate('CardDetail', {
-        boardId: foundBoardId,
-        listId: foundListId,
-        cardId: card.id,
+      navigation.navigate('SpaceTab', {
+        screen: 'CardDetail',
+        params: { boardId: foundBoardId, listId: foundListId, cardId: card.id },
       });
     }
   };
 
   const renderTask = ({ item }) => (
     <TouchableOpacity style={styles.taskCard} onPress={() => navigateToCard(item)}>
-      <View style={styles.taskHeader}>
-        <Text style={[styles.taskTitle, item.isCompleted && styles.completedText]}>
-          {item.isCompleted ? '✓ ' : ''}{item.title}
-        </Text>
-      </View>
+      <Text style={[styles.taskTitle, item.isCompleted && styles.completedText]}>
+        {item.isCompleted ? '✓ ' : ''}{item.title}
+      </Text>
       <Text style={styles.taskMeta}>📋 {item.boardTitle}</Text>
-      {item.hasTime && (
-        <Text style={styles.taskTime}>⏰ {formatTime(item.dueDate)}</Text>
-      )}
-      {item.labels?.length > 0 && (
-        <View style={styles.labelRow}>
-          {item.labels.map((label) => (
-            <View key={label.id} style={[styles.labelDot, { backgroundColor: label.color }]} />
-          ))}
-        </View>
-      )}
+      {item.hasTime && <Text style={styles.taskTime}>⏰ {formatTime(item.dueDate)}</Text>}
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Calendar</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Calendar</Text>
+      </View>
+
       <Calendar
         style={styles.calendar}
         theme={{
@@ -125,6 +114,10 @@ export default function CalendarScreen({ navigation, route }) {
           textMonthFontWeight: 'bold',
           textDayFontSize: 14,
           textMonthFontSize: 16,
+          calendarBackground: '#fff',
+          dayTextColor: colors.textPrimary,
+          textDisabledColor: '#D1D5DB',
+          dotStyle: { width: 5, height: 5, borderRadius: 3 },
         }}
         markedDates={markedDates}
         onDayPress={onDayPress}
@@ -137,7 +130,7 @@ export default function CalendarScreen({ navigation, route }) {
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
-          <Text style={styles.legendText}>Completed</Text>
+          <Text style={styles.legendText}>Done</Text>
         </View>
       </View>
 
@@ -165,26 +158,25 @@ export default function CalendarScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-    padding: 16,
-    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
+  headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   calendar: {
     marginHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: colors.surface,
+    marginTop: 10,
+    borderRadius: 12,
+    backgroundColor: '#fff',
     paddingBottom: 10,
   },
   legend: {
@@ -193,27 +185,16 @@ const styles = StyleSheet.create({
     gap: 20,
     marginTop: 16,
   },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 13, color: colors.textMuted },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.surface,
+    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -226,64 +207,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-  },
-  closeText: {
-    fontSize: 20,
-    color: colors.textSecondary,
-    padding: 4,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: colors.textSecondary,
-    fontSize: 15,
-    marginTop: 20,
-  },
-  taskList: {
-    paddingBottom: 20,
-  },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary },
+  closeText: { fontSize: 20, color: colors.textMuted, padding: 4 },
+  emptyText: { textAlign: 'center', color: colors.textMuted, fontSize: 15, marginTop: 20 },
+  taskList: { paddingBottom: 20 },
   taskCard: {
-    backgroundColor: colors.background,
+    backgroundColor: '#F9FAFB',
     padding: 14,
     borderRadius: 10,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
-  taskHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  taskTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    flex: 1,
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: colors.textSecondary,
-  },
-  taskMeta: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
-  taskTime: {
-    fontSize: 13,
-    color: colors.primary,
-    marginTop: 2,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 4,
-    marginTop: 8,
-  },
-  labelDot: {
-    width: 28,
-    height: 6,
-    borderRadius: 3,
-  },
+  taskTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+  completedText: { textDecorationLine: 'line-through', color: colors.textMuted },
+  taskMeta: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
+  taskTime: { fontSize: 13, color: colors.primary, marginTop: 2 },
 });

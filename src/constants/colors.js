@@ -1,15 +1,18 @@
 export const colors = {
-  primary: '#0079BF',
-  primaryDark: '#055A8C',
-  background: '#F5F5F5',
+  primary: '#0052CC',
+  primaryDark: '#0747A6',
+  primaryLight: '#DEEBFF',
+  background: '#F4F5F7',
   surface: '#FFFFFF',
-  listBackground: '#EBECF0',
-  success: '#5AAC44',
-  warning: '#F2D600',
-  error: '#EB5A46',
+  surfaceHover: '#FAFBFC',
+  border: '#DFE1E6',
+  borderLight: '#EBECF0',
+  success: '#36B37E',
+  warning: '#FFAB00',
+  error: '#DE350B',
   textPrimary: '#172B4D',
   textSecondary: '#5E6C84',
-  border: '#DFE1E6',
+  textMuted: '#8993A4',
 };
 
 export const labelColors = [
@@ -18,6 +21,6 @@ export const labelColors = [
 ];
 
 export const boardBackgroundColors = [
-  '#0079BF', '#519839', '#B04632', '#89609E', '#CD5A91',
-  '#00AECC', '#4BBF6B', '#838C91', '#FF9F1A', '#F2D600'
+  '#0052CC', '#00875A', '#DE350B', '#5243AA', '#FF5630',
+  '#00B8D9', '#36B37E', '#626F86', '#FF991F', '#FFC400'
 ];

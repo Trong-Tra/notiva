@@ -1,18 +1,46 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { storage } from '../storage/storage';
 import { notificationService } from '../notifications/notifications';
 import { generateId } from '../utils/helpers';
+import { Board, BoardList, Card, Space, AppState, AppAction, Stats } from '../types';
 
-const AppContext = createContext();
+interface AppContextValue {
+  boards: Board[];
+  space: Space | null;
+  onboardingComplete: boolean;
+  loading: boolean;
+  getBoard: (boardId: string) => Board | undefined;
+  getList: (boardId: string, listId: string) => BoardList | undefined;
+  getCard: (boardId: string, listId: string, cardId: string) => Card | undefined;
+  createSpace: (name: string) => Space;
+  completeOnboarding: () => Promise<void>;
+  createBoard: (title: string, backgroundColor?: string) => Board;
+  updateBoard: (board: Board) => void;
+  deleteBoard: (boardId: string) => void;
+  toggleStarBoard: (boardId: string) => void;
+  createList: (boardId: string, title: string) => BoardList;
+  updateList: (boardId: string, list: BoardList) => void;
+  deleteList: (boardId: string, listId: string) => void;
+  reorderLists: (boardId: string, lists: BoardList[]) => void;
+  createCard: (boardId: string, listId: string, title: string, dueDate?: number | null, hasTime?: boolean) => Promise<Card>;
+  updateCard: (boardId: string, listId: string, card: Card) => Promise<void>;
+  deleteCard: (boardId: string, listId: string, cardId: string) => void;
+  moveCard: (boardId: string, fromListId: string, toListId: string, cardId: string, newPosition: number) => Promise<void>;
+  reorderCards: (boardId: string, listId: string, cards: Card[]) => void;
+  getAllCardsWithDueDates: () => Card[];
+  getStats: () => Stats;
+}
 
-const initialState = {
+const AppContext = createContext<AppContextValue | undefined>(undefined);
+
+const initialState: AppState = {
   boards: [],
   space: null,
   onboardingComplete: false,
   loading: true,
 };
 
-function appReducer(state, action) {
+function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_BOARDS':
       return { ...state, boards: action.payload, loading: false };
@@ -167,7 +195,7 @@ function appReducer(state, action) {
   }
 }
 
-export function AppProvider({ children }) {
+export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   useEffect(() => {
@@ -198,18 +226,18 @@ export function AppProvider({ children }) {
     dispatch({ type: 'SET_ONBOARDING', payload: onboardingComplete });
   };
 
-  const getBoard = (boardId) => state.boards.find((b) => b.id === boardId);
-  const getList = (boardId, listId) => {
+  const getBoard = (boardId: string) => state.boards.find((b) => b.id === boardId);
+  const getList = (boardId: string, listId: string) => {
     const board = getBoard(boardId);
     return board?.lists.find((l) => l.id === listId);
   };
-  const getCard = (boardId, listId, cardId) => {
+  const getCard = (boardId: string, listId: string, cardId: string) => {
     const list = getList(boardId, listId);
     return list?.cards.find((c) => c.id === cardId);
   };
 
-  const createSpace = (name) => {
-    const space = { name: name.trim(), createdAt: Date.now() };
+  const createSpace = (name: string) => {
+    const space: Space = { name: name.trim(), createdAt: Date.now() };
     dispatch({ type: 'SET_SPACE', payload: space });
     return space;
   };
@@ -219,8 +247,8 @@ export function AppProvider({ children }) {
     dispatch({ type: 'SET_ONBOARDING', payload: true });
   };
 
-  const createBoard = (title, backgroundColor) => {
-    const board = {
+  const createBoard = (title: string, backgroundColor?: string) => {
+    const board: Board = {
       id: generateId(),
       title,
       backgroundColor: backgroundColor || '#0052CC',
@@ -232,11 +260,11 @@ export function AppProvider({ children }) {
     return board;
   };
 
-  const updateBoard = (board) => {
+  const updateBoard = (board: Board) => {
     dispatch({ type: 'UPDATE_BOARD', payload: board });
   };
 
-  const deleteBoard = (boardId) => {
+  const deleteBoard = (boardId: string) => {
     const board = getBoard(boardId);
     if (board) {
       board.lists.forEach((list) => {
@@ -248,15 +276,15 @@ export function AppProvider({ children }) {
     dispatch({ type: 'DELETE_BOARD', payload: boardId });
   };
 
-  const toggleStarBoard = (boardId) => {
+  const toggleStarBoard = (boardId: string) => {
     const board = getBoard(boardId);
     if (board) {
       updateBoard({ ...board, isStarred: !board.isStarred });
     }
   };
 
-  const createList = (boardId, title) => {
-    const list = {
+  const createList = (boardId: string, title: string) => {
+    const list: BoardList = {
       id: generateId(),
       boardId,
       title,
@@ -267,11 +295,11 @@ export function AppProvider({ children }) {
     return list;
   };
 
-  const updateList = (boardId, list) => {
+  const updateList = (boardId: string, list: BoardList) => {
     dispatch({ type: 'UPDATE_LIST', payload: { boardId, list } });
   };
 
-  const deleteList = (boardId, listId) => {
+  const deleteList = (boardId: string, listId: string) => {
     const list = getList(boardId, listId);
     if (list) {
       list.cards.forEach((card) => {
@@ -281,12 +309,12 @@ export function AppProvider({ children }) {
     dispatch({ type: 'DELETE_LIST', payload: { boardId, listId } });
   };
 
-  const reorderLists = (boardId, lists) => {
+  const reorderLists = (boardId: string, lists: BoardList[]) => {
     dispatch({ type: 'REORDER_LISTS', payload: { boardId, lists } });
   };
 
-  const createCard = async (boardId, listId, title, dueDate = null, hasTime = false) => {
-    const card = {
+  const createCard = async (boardId: string, listId: string, title: string, dueDate: number | null = null, hasTime = false) => {
+    const card: Card = {
       id: generateId(),
       listId,
       title,
@@ -307,7 +335,7 @@ export function AppProvider({ children }) {
     return card;
   };
 
-  const updateCard = async (boardId, listId, card) => {
+  const updateCard = async (boardId: string, listId: string, card: Card) => {
     dispatch({ type: 'UPDATE_CARD', payload: { boardId, listId, card } });
 
     const board = getBoard(boardId);
@@ -317,37 +345,37 @@ export function AppProvider({ children }) {
     }
   };
 
-  const deleteCard = (boardId, listId, cardId) => {
+  const deleteCard = (boardId: string, listId: string, cardId: string) => {
     notificationService.cancelCardNotification(cardId);
     dispatch({ type: 'DELETE_CARD', payload: { boardId, listId, cardId } });
   };
 
-  const moveCard = async (boardId, fromListId, toListId, cardId, newPosition) => {
+  const moveCard = async (boardId: string, fromListId: string, toListId: string, cardId: string, newPosition: number) => {
     dispatch({
       type: 'MOVE_CARD',
       payload: { boardId, fromListId, toListId, cardId, newPosition },
     });
   };
 
-  const reorderCards = (boardId, listId, cards) => {
+  const reorderCards = (boardId: string, listId: string, cards: Card[]) => {
     dispatch({ type: 'REORDER_CARDS', payload: { boardId, listId, cards } });
   };
 
   const getAllCardsWithDueDates = () => {
-    const cards = [];
+    const cards: Card[] = [];
     state.boards.forEach((board) => {
       board.lists.forEach((list) => {
         list.cards.forEach((card) => {
           if (card.dueDate) {
-            cards.push({ ...card, boardTitle: board.title, listTitle: list.title });
+            cards.push({ ...card, boardTitle: board.title, listTitle: list.title } as Card);
           }
         });
       });
     });
-    return cards.sort((a, b) => a.dueDate - b.dueDate);
+    return cards.sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
   };
 
-  const getStats = () => {
+  const getStats = (): Stats => {
     let totalCards = 0;
     let completedCards = 0;
     let overdueCards = 0;
@@ -398,4 +426,8 @@ export function AppProvider({ children }) {
   );
 }
 
-export const useApp = () => useContext(AppContext);
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) throw new Error('useApp must be used within AppProvider');
+  return context;
+};

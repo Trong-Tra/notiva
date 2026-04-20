@@ -1,26 +1,19 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors } from '../constants/colors';
 import { formatDate, isOverdue, isToday } from '../utils/helpers';
+import { NotificationsScreenProps } from '../types/navigation';
+import { Board, Card } from '../types';
 
-export default function NotificationsScreen({ navigation }) {
+export default function NotificationsScreen({ navigation }: NotificationsScreenProps) {
   const { boards, getAllCardsWithDueDates } = useApp();
   const dueCards = getAllCardsWithDueDates();
   const overdue = dueCards.filter((c) => isOverdue(c.dueDate) && !c.isCompleted);
   const today = dueCards.filter((c) => isToday(c.dueDate) && !c.isCompleted);
-  const upcoming = dueCards.filter(
-    (c) => !c.isCompleted && c.dueDate > Date.now() && !isToday(c.dueDate)
-  );
+  const upcoming = dueCards.filter((c) => !c.isCompleted && c.dueDate && c.dueDate > Date.now() && !isToday(c.dueDate));
 
-  const findCardLocation = (cardId) => {
+  const findCardLocation = (cardId: string) => {
     for (const board of boards) {
       for (const list of board.lists) {
         const card = list.cards.find((c) => c.id === cardId);
@@ -30,7 +23,7 @@ export default function NotificationsScreen({ navigation }) {
     return null;
   };
 
-  const openCard = (cardId) => {
+  const openCard = (cardId: string) => {
     const loc = findCardLocation(cardId);
     if (loc) {
       navigation.navigate('SpaceTab', {
@@ -40,7 +33,7 @@ export default function NotificationsScreen({ navigation }) {
     }
   };
 
-  const Section = ({ title, items, accentColor }) => {
+  const Section = ({ title, items, accentColor }: { title: string; items: Card[]; accentColor: string }) => {
     if (items.length === 0) return null;
     return (
       <View style={styles.section}>
@@ -51,8 +44,7 @@ export default function NotificationsScreen({ navigation }) {
             <View style={styles.rowBody}>
               <Text style={styles.rowTitle} numberOfLines={1}>{card.title}</Text>
               <Text style={styles.rowMeta}>
-                {card.boardTitle} · {formatDate(card.dueDate)}
-                {card.hasTime ? ` at ${formatDate(card.dueDate).split(',')[1] || ''}` : ''}
+                {(card as any).boardTitle} · {formatDate(card.dueDate)}
               </Text>
             </View>
             <Text style={styles.rowArrow}>›</Text>
@@ -66,9 +58,7 @@ export default function NotificationsScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Notifications</Text>
-        <Text style={styles.headerSub}>
-          {overdue.length + today.length} require attention
-        </Text>
+        <Text style={styles.headerSub}>{overdue.length + today.length} require attention</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -92,28 +82,13 @@ export default function NotificationsScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
   headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   headerSub: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
   scroll: { padding: 20, paddingBottom: 40 },
   section: { marginBottom: 20 },
   sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
-  },
+  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#F0F0F0' },
   dot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
   rowBody: { flex: 1 },
   rowTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },

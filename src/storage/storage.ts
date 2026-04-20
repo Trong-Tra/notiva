@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Board, Space } from '../types';
 
 const BOARDS_KEY = '@trello_clone_boards';
 const SPACE_KEY = '@trello_clone_space';
 const ONBOARDING_KEY = '@trello_clone_onboarding';
 
 export const storage = {
-  async getBoards() {
+  async getBoards(): Promise<Board[]> {
     try {
       const data = await AsyncStorage.getItem(BOARDS_KEY);
       return data ? JSON.parse(data) : [];
@@ -15,7 +16,7 @@ export const storage = {
     }
   },
 
-  async saveBoards(boards) {
+  async saveBoards(boards: Board[]): Promise<void> {
     try {
       await AsyncStorage.setItem(BOARDS_KEY, JSON.stringify(boards));
     } catch (e) {
@@ -23,7 +24,7 @@ export const storage = {
     }
   },
 
-  async getSpace() {
+  async getSpace(): Promise<Space | null> {
     try {
       const data = await AsyncStorage.getItem(SPACE_KEY);
       return data ? JSON.parse(data) : null;
@@ -33,7 +34,7 @@ export const storage = {
     }
   },
 
-  async saveSpace(space) {
+  async saveSpace(space: Space): Promise<void> {
     try {
       await AsyncStorage.setItem(SPACE_KEY, JSON.stringify(space));
     } catch (e) {
@@ -41,7 +42,7 @@ export const storage = {
     }
   },
 
-  async getOnboardingComplete() {
+  async getOnboardingComplete(): Promise<boolean> {
     try {
       const data = await AsyncStorage.getItem(ONBOARDING_KEY);
       return data === 'true';
@@ -51,7 +52,7 @@ export const storage = {
     }
   },
 
-  async setOnboardingComplete(value) {
+  async setOnboardingComplete(value: boolean): Promise<void> {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, value ? 'true' : 'false');
     } catch (e) {
@@ -59,7 +60,7 @@ export const storage = {
     }
   },
 
-  async clearAll() {
+  async clearAll(): Promise<void> {
     try {
       await AsyncStorage.multiRemove([BOARDS_KEY, SPACE_KEY, ONBOARDING_KEY]);
     } catch (e) {

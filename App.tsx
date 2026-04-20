@@ -13,10 +13,11 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import BoardDetailScreen from './src/screens/BoardDetailScreen';
 import CardDetailScreen from './src/screens/CardDetailScreen';
+import { RootStackParamList, SpaceStackParamList, TabParamList } from './src/types/navigation';
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
-const SpaceStack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+const SpaceStack = createNativeStackNavigator<SpaceStackParamList>();
 
 function SpaceStackNavigator() {
   return (
@@ -28,16 +29,9 @@ function SpaceStackNavigator() {
   );
 }
 
-function TabLabel({ focused, label }) {
+function TabLabel({ focused, label }: { focused: boolean; label: string }) {
   return (
-    <Text
-      style={{
-        fontSize: 11,
-        fontWeight: focused ? '700' : '500',
-        color: focused ? '#0052CC' : '#9CA3AF',
-        marginTop: 2,
-      }}
-    >
+    <Text style={{ fontSize: 11, fontWeight: focused ? '700' : '500', color: focused ? '#0052CC' : '#9CA3AF', marginTop: 2 }}>
       {label}
     </Text>
   );
@@ -56,8 +50,6 @@ function MainTabs() {
           borderTopColor: '#F0F0F0',
           backgroundColor: '#fff',
         },
-        tabBarActiveTintColor: '#0052CC',
-        tabBarInactiveTintColor: '#9CA3AF',
       }}
     >
       <Tab.Screen
@@ -65,9 +57,7 @@ function MainTabs() {
         component={HomeScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Home" />,
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>🏠</Text>
-          ),
+          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>🏠</Text>,
         }}
       />
       <Tab.Screen
@@ -75,9 +65,7 @@ function MainTabs() {
         component={SpaceStackNavigator}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Space" />,
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>📋</Text>
-          ),
+          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>📋</Text>,
         }}
       />
       <Tab.Screen
@@ -85,9 +73,7 @@ function MainTabs() {
         component={DashboardScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Dashboard" />,
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>📊</Text>
-          ),
+          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>📊</Text>,
         }}
       />
       <Tab.Screen
@@ -95,9 +81,7 @@ function MainTabs() {
         component={CalendarScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Calendar" />,
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>📅</Text>
-          ),
+          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>📅</Text>,
         }}
       />
       <Tab.Screen
@@ -105,9 +89,7 @@ function MainTabs() {
         component={NotificationsScreen}
         options={{
           tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Alerts" />,
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>🔔</Text>
-          ),
+          tabBarIcon: ({ focused }: { focused: boolean }) => <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>🔔</Text>,
         }}
       />
     </Tab.Navigator>

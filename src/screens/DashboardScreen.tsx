@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors } from '../constants/colors';
 import { isOverdue, isToday } from '../utils/helpers';
@@ -16,15 +10,11 @@ export default function DashboardScreen() {
   const dueCards = getAllCardsWithDueDates();
   const todayCount = dueCards.filter((c) => isToday(c.dueDate) && !c.isCompleted).length;
   const overdueCount = dueCards.filter((c) => isOverdue(c.dueDate) && !c.isCompleted).length;
-  const upcomingCount = dueCards.filter(
-    (c) => !c.isCompleted && c.dueDate > Date.now() && !isToday(c.dueDate)
-  ).length;
+  const upcomingCount = dueCards.filter((c) => !c.isCompleted && c.dueDate && c.dueDate > Date.now() && !isToday(c.dueDate)).length;
 
-  const completionRate = stats.totalCards > 0
-    ? Math.round((stats.completedCards / stats.totalCards) * 100)
-    : 0;
+  const completionRate = stats.totalCards > 0 ? Math.round((stats.completedCards / stats.totalCards) * 100) : 0;
 
-  const StatRow = ({ label, value, color }) => (
+  const StatRow = ({ label, value, color }: { label: string; value: number; color: string }) => (
     <View style={styles.statRow}>
       <View style={[styles.statDot, { backgroundColor: color }]} />
       <Text style={styles.statRowLabel}>{label}</Text>
@@ -40,20 +30,16 @@ export default function DashboardScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Big completion circle */}
         <View style={styles.completionCard}>
           <View style={styles.circle}>
             <Text style={styles.circlePercent}>{completionRate}%</Text>
             <Text style={styles.circleLabel}>Done</Text>
           </View>
           <View style={styles.circleMeta}>
-            <Text style={styles.circleMetaText}>
-              {stats.completedCards} of {stats.totalCards} tasks completed
-            </Text>
+            <Text style={styles.circleMetaText}>{stats.completedCards} of {stats.totalCards} tasks completed</Text>
           </View>
         </View>
 
-        {/* Task breakdown */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Task Breakdown</Text>
           <View style={styles.card}>
@@ -64,7 +50,6 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Boards overview */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Boards</Text>
           <View style={styles.card}>
@@ -73,10 +58,7 @@ export default function DashboardScreen() {
             ) : (
               boards.map((board) => {
                 const cardCount = board.lists.reduce((a, l) => a + l.cards.length, 0);
-                const doneCount = board.lists.reduce(
-                  (a, l) => a + l.cards.filter((c) => c.isCompleted).length,
-                  0
-                );
+                const doneCount = board.lists.reduce((a, l) => a + l.cards.filter((c) => c.isCompleted).length, 0);
                 const pct = cardCount > 0 ? Math.round((doneCount / cardCount) * 100) : 0;
                 return (
                   <View key={board.id} style={styles.boardRow}>
@@ -101,35 +83,12 @@ export default function DashboardScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
   headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   headerSub: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
   scroll: { padding: 20, paddingBottom: 40 },
-  completionCard: {
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
-    marginBottom: 24,
-  },
-  circle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 8,
-    borderColor: colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
+  completionCard: { alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 16, padding: 28, borderWidth: 1, borderColor: '#F0F0F0', marginBottom: 24 },
+  circle: { width: 120, height: 120, borderRadius: 60, borderWidth: 8, borderColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   circlePercent: { fontSize: 32, fontWeight: '800', color: colors.primary },
   circleLabel: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
   circleMeta: { marginTop: 4 },

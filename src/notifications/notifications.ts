@@ -1,5 +1,5 @@
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Card } from '../types';
 import { getDueDateAt9AM } from '../utils/helpers';
 
 Notifications.setNotificationHandler({
@@ -11,7 +11,7 @@ Notifications.setNotificationHandler({
 });
 
 export const notificationService = {
-  async requestPermissions() {
+  async requestPermissions(): Promise<boolean> {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
@@ -21,17 +21,15 @@ export const notificationService = {
     return finalStatus === 'granted';
   },
 
-  async scheduleCardNotification(card, boardTitle) {
+  async scheduleCardNotification(card: Card, boardTitle: string): Promise<string | null> {
     if (!card.dueDate) return null;
 
     try {
-      // Cancel any existing notification for this card
       await this.cancelCardNotification(card.id);
 
       const triggerDate = getDueDateAt9AM(card.dueDate);
       const now = Date.now();
 
-      // Don't schedule if the time has already passed
       if (triggerDate <= now) return null;
 
       const identifier = await Notifications.scheduleNotificationAsync({
@@ -53,7 +51,7 @@ export const notificationService = {
     }
   },
 
-  async cancelCardNotification(cardId) {
+  async cancelCardNotification(cardId: string): Promise<void> {
     try {
       const scheduled = await Notifications.getAllScheduledNotificationsAsync();
       const toCancel = scheduled.filter((n) => n.content.data?.cardId === cardId);
@@ -65,7 +63,7 @@ export const notificationService = {
     }
   },
 
-  async cancelAllNotifications() {
+  async cancelAllNotifications(): Promise<void> {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
     } catch (e) {

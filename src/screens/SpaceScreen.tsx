@@ -1,23 +1,13 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  ScrollView,
-  Alert,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, Alert, SafeAreaView } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, boardBackgroundColors } from '../constants/colors';
+import { SpaceScreenProps } from '../types/navigation';
 
-export default function SpaceScreen({ navigation }) {
+export default function SpaceScreen({ navigation }: SpaceScreenProps) {
   const { space, boards, createBoard, updateBoard, deleteBoard, toggleStarBoard } = useApp();
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingBoard, setEditingBoard] = useState(null);
+  const [editingBoard, setEditingBoard] = useState<ReturnType<typeof createBoard> | null>(null);
   const [title, setTitle] = useState('');
   const [selectedColor, setSelectedColor] = useState(boardBackgroundColors[0]);
 
@@ -31,7 +21,7 @@ export default function SpaceScreen({ navigation }) {
     setModalVisible(true);
   };
 
-  const openEdit = (board) => {
+  const openEdit = (board: ReturnType<typeof createBoard>) => {
     setEditingBoard(board);
     setTitle(board.title);
     setSelectedColor(board.backgroundColor);
@@ -48,34 +38,22 @@ export default function SpaceScreen({ navigation }) {
     setModalVisible(false);
   };
 
-  const confirmDelete = (board) => {
+  const confirmDelete = (board: ReturnType<typeof createBoard>) => {
     Alert.alert('Delete Board', `Delete "${board.title}"?`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => deleteBoard(board.id) },
     ]);
   };
 
-  const renderBoard = (board) => (
-    <TouchableOpacity
-      style={styles.boardCard}
-      onPress={() => navigation.navigate('BoardDetail', { boardId: board.id })}
-      onLongPress={() => openEdit(board)}
-      activeOpacity={0.7}
-    >
+  const renderBoard = (board: ReturnType<typeof createBoard>) => (
+    <TouchableOpacity style={styles.boardCard} onPress={() => navigation.navigate('BoardDetail', { boardId: board.id })} onLongPress={() => openEdit(board)} activeOpacity={0.7}>
       <View style={[styles.colorBar, { backgroundColor: board.backgroundColor }]} />
       <View style={styles.boardBody}>
         <Text style={styles.boardTitle} numberOfLines={1}>{board.title}</Text>
-        <Text style={styles.boardMeta}>
-          {board.lists.length} lists · {board.lists.reduce((a, l) => a + l.cards.length, 0)} cards
-        </Text>
+        <Text style={styles.boardMeta}>{board.lists.length} lists · {board.lists.reduce((a, l) => a + l.cards.length, 0)} cards</Text>
       </View>
-      <TouchableOpacity
-        onPress={(e) => { e.stopPropagation(); toggleStarBoard(board.id); }}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <Text style={[styles.star, board.isStarred && styles.starActive]}>
-          {board.isStarred ? '★' : '☆'}
-        </Text>
+      <TouchableOpacity onPress={(e) => { e.stopPropagation(); toggleStarBoard(board.id); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <Text style={[styles.star, board.isStarred && styles.starActive]}>{board.isStarred ? '★' : '☆'}</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -123,23 +101,11 @@ export default function SpaceScreen({ navigation }) {
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>{editingBoard ? 'Edit Board' : 'New Board'}</Text>
             <Text style={styles.modalLabel}>Title</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Board name"
-              placeholderTextColor="#9CA3AF"
-              value={title}
-              onChangeText={setTitle}
-              autoFocus
-              maxLength={40}
-            />
+            <TextInput style={styles.modalInput} placeholder="Board name" placeholderTextColor="#9CA3AF" value={title} onChangeText={setTitle} autoFocus maxLength={40} />
             <Text style={styles.modalLabel}>Color</Text>
             <View style={styles.colorRow}>
               {boardBackgroundColors.map((color) => (
-                <TouchableOpacity
-                  key={color}
-                  style={[styles.colorDot, { backgroundColor: color }, selectedColor === color && styles.colorDotActive]}
-                  onPress={() => setSelectedColor(color)}
-                />
+                <TouchableOpacity key={color} style={[styles.colorDot, { backgroundColor: color }, selectedColor === color && styles.colorDotActive]} onPress={() => setSelectedColor(color)} />
               ))}
             </View>
             <View style={styles.modalActions}>
@@ -165,16 +131,7 @@ export default function SpaceScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
   headerLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
   headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   newBtn: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8 },
@@ -183,15 +140,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24 },
   sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
   listItem: { marginBottom: 8 },
-  boardCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
-    overflow: 'hidden',
-  },
+  boardCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 10, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
   colorBar: { width: 4, alignSelf: 'stretch' },
   boardBody: { flex: 1, padding: 14 },
   boardTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },

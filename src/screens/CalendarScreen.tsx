@@ -79,10 +79,10 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
   const renderTask = ({ item }: { item: Card }) => (
     <TouchableOpacity style={styles.taskCard} onPress={() => navigateToCard(item)}>
       <Text style={[styles.taskTitle, item.isCompleted && styles.completedText]}>
-        {item.isCompleted ? '✓ ' : ''}{item.title}
+        {item.isCompleted ? '[Done] ' : ''}{item.title}
       </Text>
-      <Text style={styles.taskMeta}>📋 {(item as any).boardTitle}</Text>
-      {item.hasTime && <Text style={styles.taskTime}>⏰ {formatTime(item.dueDate)}</Text>}
+      <Text style={styles.taskMeta}>Board: {(item as any).boardTitle}</Text>
+      {item.hasTime && <Text style={styles.taskTime}>Time: {formatTime(item.dueDate)}</Text>}
     </TouchableOpacity>
   );
 

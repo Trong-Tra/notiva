@@ -45,26 +45,35 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
     ]);
   };
 
-  const renderBoard = (board: ReturnType<typeof createBoard>) => (
-    <TouchableOpacity style={styles.boardCard} onPress={() => navigation.navigate('BoardDetail', { boardId: board.id })} onLongPress={() => openEdit(board)} activeOpacity={0.7}>
-      <View style={[styles.colorBar, { backgroundColor: board.backgroundColor }]} />
-      <View style={styles.boardBody}>
-        <Text style={styles.boardTitle} numberOfLines={1}>{board.title}</Text>
-        <Text style={styles.boardMeta}>{board.lists.length} lists · {board.lists.reduce((a, l) => a + l.cards.length, 0)} cards</Text>
+  const renderBoardCard = (board: ReturnType<typeof createBoard>) => (
+    <TouchableOpacity
+      style={styles.boardCard}
+      onPress={() => navigation.navigate('BoardDetail', { boardId: board.id })}
+      onLongPress={() => openEdit(board)}
+      activeOpacity={0.8}
+    >
+      <View style={[styles.cardTop, { backgroundColor: board.backgroundColor }]} />
+      <View style={styles.cardBody}>
+        <Text style={styles.cardTitle} numberOfLines={2}>{board.title}</Text>
+        <View style={styles.cardFooter}>
+          <Text style={styles.cardMeta}>
+            {board.lists.length} list{board.lists.length !== 1 ? 's' : ''} · {board.lists.reduce((a, l) => a + l.cards.length, 0)} card{board.lists.reduce((a, l) => a + l.cards.length, 0) !== 1 ? 's' : ''}
+          </Text>
+          <TouchableOpacity
+            onPress={(e) => { e.stopPropagation(); toggleStarBoard(board.id); }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={[styles.star, board.isStarred && styles.starActive]}>{board.isStarred ? '★' : '☆'}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <TouchableOpacity onPress={(e) => { e.stopPropagation(); toggleStarBoard(board.id); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-        <Text style={[styles.star, board.isStarred && styles.starActive]}>{board.isStarred ? '★' : '☆'}</Text>
-      </TouchableOpacity>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerLabel}>{space?.name || 'Workspace'}</Text>
-          <Text style={styles.headerTitle}>Space</Text>
-        </View>
+        <Text style={styles.headerTitle}>{space?.name || 'Space'}</Text>
         <TouchableOpacity style={styles.newBtn} onPress={openCreate}>
           <Text style={styles.newBtnText}>+ New Board</Text>
         </TouchableOpacity>
@@ -74,9 +83,11 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
         {starredBoards.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Starred</Text>
-            {starredBoards.map((board) => (
-              <View key={board.id} style={styles.listItem}>{renderBoard(board)}</View>
-            ))}
+            <View style={styles.grid}>
+              {starredBoards.map((board) => (
+                <View key={board.id} style={styles.gridItem}>{renderBoardCard(board)}</View>
+              ))}
+            </View>
           </View>
         )}
 
@@ -84,12 +95,24 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
           <Text style={styles.sectionLabel}>All Boards</Text>
           {allBoards.length === 0 ? (
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>No boards yet. Create one to get started.</Text>
+              <Text style={styles.emptyTitle}>No boards yet</Text>
+              <Text style={styles.emptyText}>Create your first board to start organizing work.</Text>
+              <TouchableOpacity style={styles.emptyBtn} onPress={openCreate}>
+                <Text style={styles.emptyBtnText}>Create Board</Text>
+              </TouchableOpacity>
             </View>
           ) : (
-            allBoards.map((board) => (
-              <View key={board.id} style={styles.listItem}>{renderBoard(board)}</View>
-            ))
+            <View style={styles.grid}>
+              {allBoards.map((board) => (
+                <View key={board.id} style={styles.gridItem}>{renderBoardCard(board)}</View>
+              ))}
+              <TouchableOpacity style={[styles.gridItem, styles.createTile]} onPress={openCreate}>
+                <View style={styles.createTileInner}>
+                  <Text style={styles.createTilePlus}>+</Text>
+                  <Text style={styles.createTileText}>New Board</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -132,23 +155,31 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  headerLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
   headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   newBtn: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8 },
   newBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   scroll: { padding: 20, paddingBottom: 40 },
-  section: { marginBottom: 24 },
-  sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
-  listItem: { marginBottom: 8 },
-  boardCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 10, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
-  colorBar: { width: 4, alignSelf: 'stretch' },
-  boardBody: { flex: 1, padding: 14 },
-  boardTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-  boardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 3 },
-  star: { fontSize: 16, color: '#D1D5DB', marginRight: 14 },
+  section: { marginBottom: 28 },
+  sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  gridItem: { width: '48%' },
+  boardCard: { backgroundColor: '#F9FAFB', borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
+  cardTop: { height: 6, width: '100%' },
+  cardBody: { padding: 14 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 10, minHeight: 40 },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cardMeta: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+  star: { fontSize: 16, color: '#D1D5DB' },
   starActive: { color: '#F59E0B' },
-  empty: { paddingVertical: 20, alignItems: 'center' },
-  emptyText: { color: colors.textMuted, fontSize: 14 },
+  createTile: { backgroundColor: '#FAFAFA', borderRadius: 12, borderWidth: 1.5, borderColor: '#E5E7EB', borderStyle: 'dashed', minHeight: 90, justifyContent: 'center', alignItems: 'center' },
+  createTileInner: { alignItems: 'center' },
+  createTilePlus: { fontSize: 24, color: colors.textMuted, fontWeight: '300', marginBottom: 4 },
+  createTileText: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
+  empty: { alignItems: 'center', paddingVertical: 40 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
+  emptyText: { fontSize: 14, color: colors.textMuted, marginBottom: 20, textAlign: 'center' },
+  emptyBtn: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
+  emptyBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   modalDismiss: { flex: 1 },
   modalSheet: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingBottom: 36, paddingTop: 10 },

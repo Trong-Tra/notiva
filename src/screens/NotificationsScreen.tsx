@@ -64,7 +64,7 @@ export default function NotificationsScreen({ navigation }: NotificationsScreenP
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {overdue.length === 0 && today.length === 0 && upcoming.length === 0 && (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🔔</Text>
+            <View style={styles.emptyCircle}><Text style={styles.emptyCircleText}>!</Text></View>
             <Text style={styles.emptyTitle}>All caught up</Text>
             <Text style={styles.emptyText}>No upcoming deadlines right now.</Text>
           </View>
@@ -95,7 +95,8 @@ const styles = StyleSheet.create({
   rowMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   rowArrow: { fontSize: 18, color: colors.textMuted, fontWeight: '300', marginLeft: 8 },
   empty: { alignItems: 'center', paddingTop: 60 },
-  emptyIcon: { fontSize: 48, marginBottom: 16 },
+  emptyCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  emptyCircleText: { fontSize: 28, fontWeight: '800', color: colors.primary },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
   emptyText: { fontSize: 14, color: colors.textMuted },
 });

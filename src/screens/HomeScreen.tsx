@@ -17,7 +17,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
   const StatCard = ({ label, value, color }: { label: string; value: number; color: string }) => (
     <View style={styles.statCard}>
       <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
     </View>
   );
 
@@ -25,7 +25,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <View style={styles.welcome}>
-          <Text style={styles.greeting}>Hello 👋</Text>
+          <Text style={styles.greeting}>Welcome back</Text>
           <Text style={styles.spaceName}>{space?.name || 'Your Workspace'}</Text>
         </View>
 
@@ -33,26 +33,34 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           <StatCard label="Boards" value={stats.totalBoards} color={colors.primary} />
           <StatCard label="Tasks" value={stats.totalCards} color={colors.textPrimary} />
           <StatCard label="Done" value={stats.completedCards} color={colors.success} />
-          <StatCard label="Overdue" value={stats.overdueCards} color={colors.error} />
+          <StatCard label="Late" value={stats.overdueCards} color={colors.error} />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Access</Text>
           <View style={styles.quickGrid}>
-            <TouchableOpacity style={[styles.quickCard, { backgroundColor: colors.primaryLight }]} onPress={() => navigation.navigate('SpaceTab', { screen: 'SpaceBoards' })}>
-              <Text style={styles.quickIcon}>📋</Text>
-              <Text style={styles.quickLabel}>My Boards</Text>
+            <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate('SpaceTab', { screen: 'SpaceBoards' })}>
+              <View style={[styles.quickIconBox, { backgroundColor: colors.primaryLight }]}>
+                <Text style={[styles.quickIconText, { color: colors.primary }]}>B</Text>
+              </View>
+              <Text style={styles.quickLabel}>Boards</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.quickCard, { backgroundColor: '#E3FCEF' }]} onPress={() => navigation.navigate('CalendarTab')}>
-              <Text style={styles.quickIcon}>📅</Text>
+            <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate('CalendarTab')}>
+              <View style={[styles.quickIconBox, { backgroundColor: '#E3FCEF' }]}>
+                <Text style={[styles.quickIconText, { color: colors.success }]}>C</Text>
+              </View>
               <Text style={styles.quickLabel}>Calendar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.quickCard, { backgroundColor: '#FFEBE6' }]} onPress={() => navigation.navigate('NotificationsTab')}>
-              <Text style={styles.quickIcon}>🔔</Text>
+            <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate('NotificationsTab')}>
+              <View style={[styles.quickIconBox, { backgroundColor: '#FFEBE6' }]}>
+                <Text style={[styles.quickIconText, { color: colors.error }]}>A</Text>
+              </View>
               <Text style={styles.quickLabel}>Alerts{overdueCards.length > 0 ? ` (${overdueCards.length})` : ''}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.quickCard, { backgroundColor: '#EAE6FF' }]} onPress={() => navigation.navigate('DashboardTab')}>
-              <Text style={styles.quickIcon}>📊</Text>
+            <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate('DashboardTab')}>
+              <View style={[styles.quickIconBox, { backgroundColor: '#EAE6FF' }]}>
+                <Text style={[styles.quickIconText, { color: '#5243AA' }]}>D</Text>
+              </View>
               <Text style={styles.quickLabel}>Dashboard</Text>
             </TouchableOpacity>
           </View>
@@ -65,7 +73,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
               <View key={card.id} style={styles.taskRow}>
                 <View style={[styles.taskDot, { backgroundColor: colors.warning }]} />
                 <Text style={styles.taskText} numberOfLines={1}>{card.title}</Text>
-                <Text style={styles.taskBoard}>{card.boardTitle}</Text>
+                <Text style={styles.taskBoard}>{(card as any).boardTitle}</Text>
               </View>
             ))}
           </View>
@@ -120,18 +128,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   scroll: { padding: 20, paddingBottom: 40 },
   welcome: { marginBottom: 24 },
-  greeting: { fontSize: 16, color: colors.textSecondary, fontWeight: '500' },
+  greeting: { fontSize: 15, color: colors.textSecondary, fontWeight: '500' },
   spaceName: { fontSize: 28, fontWeight: '800', color: colors.textPrimary, marginTop: 4, letterSpacing: -0.5 },
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
-  statCard: { flex: 1, backgroundColor: '#F9FAFB', borderRadius: 12, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#F0F0F0' },
-  statValue: { fontSize: 22, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: colors.textMuted, marginTop: 4, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  statCard: { flex: 1, backgroundColor: '#F9FAFB', borderRadius: 12, paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', borderWidth: 1, borderColor: '#F0F0F0' },
+  statValue: { fontSize: 24, fontWeight: '800' },
+  statLabel: { fontSize: 11, color: colors.textMuted, marginTop: 6, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
-  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  quickCard: { width: '47%', minWidth: 140, padding: 16, borderRadius: 12, alignItems: 'center' },
-  quickIcon: { fontSize: 28, marginBottom: 8 },
-  quickLabel: { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  quickCard: { width: '47%', flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0' },
+  quickIconBox: { width: 40, height: 40, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  quickIconText: { fontSize: 16, fontWeight: '800' },
+  quickLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   taskRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#F0F0F0' },
   taskDot: { width: 8, height: 8, borderRadius: 4, marginRight: 10 },
   taskText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.textPrimary },

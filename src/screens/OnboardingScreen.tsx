@@ -59,7 +59,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
 
           {step === 1 && (
             <View style={styles.step}>
-              <Text style={styles.emoji}>🚀</Text>
+              <View style={styles.iconCircle}><Text style={styles.iconText}>1</Text></View>
               <Text style={styles.title}>Welcome aboard</Text>
               <Text style={styles.subtitle}>Let's set up your workspace. What should we call it?</Text>
               <TextInput
@@ -82,7 +82,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
 
           {step === 2 && (
             <View style={styles.step}>
-              <Text style={styles.emoji}>📋</Text>
+              <View style={styles.iconCircle}><Text style={styles.iconText}>2</Text></View>
               <Text style={styles.title}>Create your first board</Text>
               <Text style={styles.subtitle}>Boards help you organize tasks. Give your first one a name.</Text>
               <TextInput style={styles.input} placeholder="e.g. Project Alpha, Homework, Shopping" placeholderTextColor={colors.textMuted} value={boardTitle} onChangeText={setBoardTitle} autoFocus maxLength={30} />
@@ -100,7 +100,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
 
           {step === 3 && (
             <View style={styles.step}>
-              <Text style={styles.emoji}>✅</Text>
+              <View style={styles.iconCircle}><Text style={styles.iconText}>3</Text></View>
               <Text style={styles.title}>Add your first task</Text>
               <Text style={styles.subtitle}>What is the first thing you need to get done?</Text>
               <TextInput style={styles.input} placeholder="e.g. Finish assignment, Buy groceries" placeholderTextColor={colors.textMuted} value={taskTitle} onChangeText={setTaskTitle} autoFocus maxLength={40} />
@@ -123,7 +123,8 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E5E7EB' },
   dotActive: { backgroundColor: colors.primary, width: 24 },
   step: { alignItems: 'center' },
-  emoji: { fontSize: 56, marginBottom: 24 },
+  iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
+  iconText: { fontSize: 24, fontWeight: '800', color: colors.primary },
   title: { fontSize: 28, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 },
   subtitle: { fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: 32, paddingHorizontal: 8 },
   input: { width: '100%', backgroundColor: '#F9FAFB', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', padding: 16, fontSize: 16, color: colors.textPrimary, marginBottom: 20 },

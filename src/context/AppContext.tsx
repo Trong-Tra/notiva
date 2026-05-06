@@ -3,6 +3,7 @@ import { storage } from '../storage/storage';
 import { notificationService } from '../notifications/notifications';
 import { generateId } from '../utils/helpers';
 import { Board, BoardList, Card, Space, AppState, AppAction, Stats } from '../types';
+import { createMockSpace, createMockBoards } from '../data/mockData';
 
 interface AppContextValue {
   boards: Board[];
@@ -29,6 +30,7 @@ interface AppContextValue {
   reorderCards: (boardId: string, listId: string, cards: Card[]) => void;
   getAllCardsWithDueDates: () => Card[];
   getStats: () => Stats;
+  loadMockData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -392,6 +394,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { totalCards, completedCards, overdueCards, totalBoards: state.boards.length };
   };
 
+  const loadMockData = async () => {
+    const space = createMockSpace();
+    const boards = createMockBoards();
+    dispatch({ type: 'SET_SPACE', payload: space });
+    dispatch({ type: 'SET_BOARDS', payload: boards });
+    await storage.saveSpace(space);
+    await storage.saveBoards(boards);
+    await storage.setOnboardingComplete(true);
+    dispatch({ type: 'SET_ONBOARDING', payload: true });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -419,6 +432,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         reorderCards,
         getAllCardsWithDueDates,
         getStats,
+        loadMockData,
       }}
     >
       {children}

@@ -5,21 +5,21 @@ import { storage } from '../storage/storage';
 import { colors } from '../constants/colors';
 import { isOverdue, isToday } from '../utils/helpers';
 import { HomeScreenNavigationProp } from '../types/navigation';
+import PieChart from '../components/PieChart';
 
 export default function HomeScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
-  const { space, boards, getStats, getAllCardsWithDueDates } = useApp();
+  const { space, boards, getStats, getAllCardsWithDueDates, loadMockData } = useApp();
   const stats = getStats();
   const dueCards = getAllCardsWithDueDates();
   const todayCards = dueCards.filter((c) => isToday(c.dueDate) && !c.isCompleted);
   const overdueCards = dueCards.filter((c) => isOverdue(c.dueDate) && !c.isCompleted);
   const recentBoards = [...boards].sort((a, b) => b.createdAt - a.createdAt).slice(0, 3);
 
-  const StatCard = ({ label, value, color }: { label: string; value: number; color: string }) => (
-    <View style={styles.statCard}>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
-    </View>
-  );
+  const chartData = [
+    { value: stats.completedCards, color: colors.success, label: 'Done' },
+    { value: stats.overdueCards, color: colors.error, label: 'Late' },
+    { value: Math.max(0, stats.totalCards - stats.completedCards - stats.overdueCards), color: colors.primary, label: 'Current' },
+  ].filter((d) => d.value > 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,11 +29,38 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           <Text style={styles.spaceName}>{space?.name || 'Your Workspace'}</Text>
         </View>
 
-        <View style={styles.statsRow}>
-          <StatCard label="Boards" value={stats.totalBoards} color={colors.primary} />
-          <StatCard label="Tasks" value={stats.totalCards} color={colors.textPrimary} />
-          <StatCard label="Done" value={stats.completedCards} color={colors.success} />
-          <StatCard label="Late" value={stats.overdueCards} color={colors.error} />
+        <View style={styles.overviewCard}>
+          <View style={styles.overviewLeft}>
+            {stats.totalCards > 0 ? (
+              <PieChart data={chartData} />
+            ) : (
+              <View style={styles.emptyChart}>
+                <Text style={styles.emptyChartText}>No tasks</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.overviewRight}>
+            <View style={styles.overviewRow}>
+              <View style={[styles.overviewDot, { backgroundColor: colors.success }]} />
+              <Text style={styles.overviewLabel}>Done</Text>
+              <Text style={styles.overviewValue}>{stats.completedCards}</Text>
+            </View>
+            <View style={styles.overviewRow}>
+              <View style={[styles.overviewDot, { backgroundColor: colors.error }]} />
+              <Text style={styles.overviewLabel}>Late</Text>
+              <Text style={styles.overviewValue}>{stats.overdueCards}</Text>
+            </View>
+            <View style={styles.overviewRow}>
+              <View style={[styles.overviewDot, { backgroundColor: colors.primary }]} />
+              <Text style={styles.overviewLabel}>Current</Text>
+              <Text style={styles.overviewValue}>{Math.max(0, stats.totalCards - stats.completedCards - stats.overdueCards)}</Text>
+            </View>
+            <View style={[styles.overviewRow, styles.overviewRowBorder]}>
+              <View style={[styles.overviewDot, { backgroundColor: colors.textMuted }]} />
+              <Text style={styles.overviewLabel}>Boards</Text>
+              <Text style={styles.overviewValue}>{stats.totalBoards}</Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -106,24 +133,43 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           </View>
         )}
 
-        <TouchableOpacity
-          style={styles.resetBtn}
-          onPress={() =>
-            Alert.alert('Reset App Data', 'This will wipe all boards, tasks, and settings. Are you sure?', [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Reset',
-                style: 'destructive',
-                onPress: async () => {
-                  await storage.clearAll();
-                  Alert.alert('Data Wiped', 'Please close and reopen the app to start fresh.');
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() =>
+              Alert.alert('Load Demo Data', 'This will replace all current data with sample boards, lists, and tasks.', [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Load',
+                  style: 'default',
+                  onPress: async () => {
+                    await loadMockData();
+                  },
                 },
-              },
-            ])
-          }
-        >
-          <Text style={styles.resetText}>Reset App Data</Text>
-        </TouchableOpacity>
+              ])
+            }
+          >
+            <Text style={styles.actionText}>Load Demo Data</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() =>
+              Alert.alert('Reset App Data', 'This will wipe all boards, tasks, and settings. Are you sure?', [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Reset',
+                  style: 'destructive',
+                  onPress: async () => {
+                    await storage.clearAll();
+                    Alert.alert('Data Wiped', 'Please close and reopen the app to start fresh.');
+                  },
+                },
+              ])
+            }
+          >
+            <Text style={styles.resetText}>Reset App Data</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -137,10 +183,16 @@ const styles = StyleSheet.create({
   welcome: { marginBottom: 24 },
   greeting: { fontSize: 15, color: colors.textSecondary, fontWeight: '500' },
   spaceName: { fontSize: 28, fontWeight: '800', color: colors.textPrimary, marginTop: 4, letterSpacing: -0.5 },
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
-  statCard: { flex: 1, backgroundColor: '#F9FAFB', borderRadius: 12, paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', borderWidth: 1, borderColor: '#F0F0F0' },
-  statValue: { fontSize: 24, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: colors.textMuted, marginTop: 6, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  overviewCard: { flexDirection: 'row', backgroundColor: '#F9FAFB', borderRadius: 16, borderWidth: 1, borderColor: '#F0F0F0', padding: 20, marginBottom: 28, alignItems: 'center' },
+  overviewLeft: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  overviewRight: { flex: 1, paddingLeft: 16, gap: 12 },
+  overviewRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  overviewRowBorder: { borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 12, marginTop: 4 },
+  overviewDot: { width: 10, height: 10, borderRadius: 5 },
+  overviewLabel: { flex: 1, fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
+  overviewValue: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
+  emptyChart: { width: 140, height: 140, borderRadius: 70, borderWidth: 4, borderColor: '#E5E7EB', justifyContent: 'center', alignItems: 'center' },
+  emptyChartText: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
   table: { borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
@@ -159,6 +211,8 @@ const styles = StyleSheet.create({
   recentTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   recentMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   recentArrow: { fontSize: 20, color: colors.textMuted, fontWeight: '300' },
-  resetBtn: { marginTop: 20, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, borderWidth: 1, borderColor: '#E5E7EB' },
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 20, justifyContent: 'center' },
+  actionBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, borderWidth: 1, borderColor: '#E5E7EB' },
+  actionText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
   resetText: { fontSize: 13, color: colors.error, fontWeight: '600' },
 });

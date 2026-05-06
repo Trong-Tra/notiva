@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   backText: { color: '#fff', fontSize: 16, fontWeight: '600', textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
   boardTitleText: { color: '#fff', fontSize: 18, fontWeight: 'bold', textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2, maxWidth: 200 },
   boardScroll: { paddingHorizontal: 12, paddingVertical: 8, alignItems: 'flex-start' },
-  listColumn: { width: 280, backgroundColor: colors.listBackground, borderRadius: 8, marginRight: 12, maxHeight: '85%' },
+  listColumn: { width: 280, backgroundColor: colors.background, borderRadius: 8, marginRight: 12, maxHeight: '85%' },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
   listTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
   listActions: { flexDirection: 'row', gap: 12 },

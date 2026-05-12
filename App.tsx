@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppProvider, useApp } from './src/context/AppContext';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -29,19 +30,36 @@ function SpaceStackNavigator() {
   );
 }
 
-function TabLabel({ focused, label }: { focused: boolean; label: string }) {
+const TAB_ICONS: Record<string, { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap }> = {
+  HomeTab: { active: 'home', inactive: 'home-outline' },
+  SpaceTab: { active: 'grid', inactive: 'grid-outline' },
+  DashboardTab: { active: 'bar-chart', inactive: 'bar-chart-outline' },
+  CalendarTab: { active: 'calendar', inactive: 'calendar-outline' },
+  NotificationsTab: { active: 'notifications', inactive: 'notifications-outline' },
+};
+
+function TabIcon({ focused, routeName }: { focused: boolean; routeName: string }) {
+  const icons = TAB_ICONS[routeName];
+  if (!icons) return null;
+  const name = focused ? icons.active : icons.inactive;
   return (
-    <Text style={{ fontSize: 11, fontWeight: focused ? '700' : '500', color: focused ? '#0052CC' : '#9CA3AF', marginTop: 2 }}>
-      {label}
-    </Text>
+    <Ionicons
+      name={name}
+      size={22}
+      color={focused ? '#0052CC' : '#9CA3AF'}
+    />
   );
 }
 
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarIcon: ({ focused }) => <TabIcon focused={focused} routeName={route.name} />,
+        tabBarActiveTintColor: '#0052CC',
+        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarStyle: {
           height: 88,
           paddingTop: 8,
@@ -50,42 +68,32 @@ function MainTabs() {
           borderTopColor: '#F0F0F0',
           backgroundColor: '#fff',
         },
-      }}
+      })}
     >
       <Tab.Screen
         name="HomeTab"
         component={HomeScreen}
-        options={{
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Home" />,
-        }}
+        options={{ tabBarLabel: 'Home' }}
       />
       <Tab.Screen
         name="SpaceTab"
         component={SpaceStackNavigator}
-        options={{
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Space" />,
-        }}
+        options={{ tabBarLabel: 'Space' }}
       />
       <Tab.Screen
         name="DashboardTab"
         component={DashboardScreen}
-        options={{
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Dashboard" />,
-        }}
+        options={{ tabBarLabel: 'Dashboard' }}
       />
       <Tab.Screen
         name="CalendarTab"
         component={CalendarScreen}
-        options={{
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Calendar" />,
-        }}
+        options={{ tabBarLabel: 'Calendar' }}
       />
       <Tab.Screen
         name="NotificationsTab"
         component={NotificationsScreen}
-        options={{
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused} label="Alerts" />,
-        }}
+        options={{ tabBarLabel: 'Alerts' }}
       />
     </Tab.Navigator>
   );

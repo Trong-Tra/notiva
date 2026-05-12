@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, Alert, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, boardBackgroundColors } from '../constants/colors';
 import { SpaceScreenProps } from '../types/navigation';
@@ -118,35 +118,39 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
       </ScrollView>
 
       <Modal visible={modalVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity style={styles.modalDismiss} onPress={() => setModalVisible(false)} />
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>{editingBoard ? 'Edit Board' : 'New Board'}</Text>
-            <Text style={styles.modalLabel}>Title</Text>
-            <TextInput style={styles.modalInput} placeholder="Board name" placeholderTextColor="#9CA3AF" value={title} onChangeText={setTitle} autoFocus maxLength={40} />
-            <Text style={styles.modalLabel}>Color</Text>
-            <View style={styles.colorRow}>
-              {boardBackgroundColors.map((color) => (
-                <TouchableOpacity key={color} style={[styles.colorDot, { backgroundColor: color }, selectedColor === color && styles.colorDotActive]} onPress={() => setSelectedColor(color)} />
-              ))}
-            </View>
-            <View style={styles.modalActions}>
-              {editingBoard && (
-                <TouchableOpacity onPress={() => { setModalVisible(false); confirmDelete(editingBoard); }}>
-                  <Text style={styles.modalDelete}>Delete</Text>
-                </TouchableOpacity>
-              )}
-              <View style={{ flex: 1 }} />
-              <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
-                <Text style={styles.modalCancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalConfirm, !title.trim() && styles.modalConfirmDisabled]} onPress={saveBoard} disabled={!title.trim()}>
-                <Text style={styles.modalConfirmText}>{editingBoard ? 'Save' : 'Create'}</Text>
-              </TouchableOpacity>
-            </View>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <View style={[styles.modalOverlay, { justifyContent: undefined }]}>
+            <TouchableOpacity style={styles.modalDismiss} onPress={() => setModalVisible(false)} />
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <View style={styles.modalSheet}>
+                <View style={styles.modalHandle} />
+                <Text style={styles.modalTitle}>{editingBoard ? 'Edit Board' : 'New Board'}</Text>
+                <Text style={styles.modalLabel}>Title</Text>
+                <TextInput style={styles.modalInput} placeholder="Board name" placeholderTextColor="#9CA3AF" value={title} onChangeText={setTitle} autoFocus maxLength={40} />
+                <Text style={styles.modalLabel}>Color</Text>
+                <View style={styles.colorRow}>
+                  {boardBackgroundColors.map((color) => (
+                    <TouchableOpacity key={color} style={[styles.colorDot, { backgroundColor: color }, selectedColor === color && styles.colorDotActive]} onPress={() => setSelectedColor(color)} />
+                  ))}
+                </View>
+                <View style={styles.modalActions}>
+                  {editingBoard && (
+                    <TouchableOpacity onPress={() => { setModalVisible(false); confirmDelete(editingBoard); }}>
+                      <Text style={styles.modalDelete}>Delete</Text>
+                    </TouchableOpacity>
+                  )}
+                  <View style={{ flex: 1 }} />
+                  <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
+                    <Text style={styles.modalCancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.modalConfirm, !title.trim() && styles.modalConfirmDisabled]} onPress={saveBoard} disabled={!title.trim()}>
+                    <Text style={styles.modalConfirmText}>{editingBoard ? 'Save' : 'Create'}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

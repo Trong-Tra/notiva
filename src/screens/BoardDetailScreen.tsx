@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors } from '../constants/colors';
 import { formatDate, isOverdue } from '../utils/helpers';
@@ -194,45 +194,51 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
       </ScrollView>
 
       <Modal visible={listModalVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>{editingListId ? 'Edit List' : 'Add List'}</Text>
-            <TextInput style={styles.modalInput} placeholder="List title" value={listTitle} onChangeText={setListTitle} autoFocus />
-            <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setListModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveList}><Text style={{ color: '#fff' }}>{editingListId ? 'Save' : 'Add'}</Text></TouchableOpacity>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>{editingListId ? 'Edit List' : 'Add List'}</Text>
+              <TextInput style={styles.modalInput} placeholder="List title" value={listTitle} onChangeText={setListTitle} autoFocus />
+              <View style={styles.modalRow}>
+                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setListModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveList}><Text style={{ color: '#fff' }}>{editingListId ? 'Save' : 'Add'}</Text></TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={cardModalVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>{editingCardId ? 'Edit Card' : 'Add Card'}</Text>
-            <TextInput style={styles.modalInput} placeholder="Card title" value={cardTitle} onChangeText={setCardTitle} autoFocus />
-            <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setCardModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveCard}><Text style={{ color: '#fff' }}>{editingCardId ? 'Save' : 'Add'}</Text></TouchableOpacity>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>{editingCardId ? 'Edit Card' : 'Add Card'}</Text>
+              <TextInput style={styles.modalInput} placeholder="Card title" value={cardTitle} onChangeText={setCardTitle} autoFocus />
+              <View style={styles.modalRow}>
+                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setCardModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveCard}><Text style={{ color: '#fff' }}>{editingCardId ? 'Save' : 'Add'}</Text></TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={moveModalVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Move to List</Text>
-            {board.lists.map((l) => (
-              <TouchableOpacity key={l.id} style={styles.moveItem} onPress={() => executeMove(l.id)}>
-                <Text style={styles.moveItemText}>{l.title}</Text>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>Move to List</Text>
+              {board.lists.map((l) => (
+                <TouchableOpacity key={l.id} style={styles.moveItem} onPress={() => executeMove(l.id)}>
+                  <Text style={styles.moveItemText}>{l.title}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setMoveModalVisible(false)}>
+                <Text style={{ textAlign: 'center' }}>Cancel</Text>
               </TouchableOpacity>
-            ))}
-            <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setMoveModalVisible(false)}>
-              <Text style={{ textAlign: 'center' }}>Cancel</Text>
-            </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

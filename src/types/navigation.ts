@@ -9,7 +9,7 @@ export type RootStackParamList = {
 export type SpaceStackParamList = {
   SpaceBoards: undefined;
   BoardDetail: { boardId: string };
-  CardDetail: { boardId: string; listId: string; cardId: string };
+  CardDetail: { boardId: string; listId: string; cardId: string; fromTab?: string };
 };
 
 export type TabParamList = {

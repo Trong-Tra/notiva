@@ -71,7 +71,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
     if (foundBoardId) {
       navigation.navigate('SpaceTab', {
         screen: 'CardDetail',
-        params: { boardId: foundBoardId, listId: foundListId, cardId: card.id },
+        params: { boardId: foundBoardId, listId: foundListId, cardId: card.id, fromTab: 'CalendarTab' },
       });
     }
   };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Switch } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useApp } from '../context/AppContext';
 import { colors, labelColors } from '../constants/colors';
@@ -8,7 +9,7 @@ import { CardDetailScreenProps } from '../types/navigation';
 import { Label, Checklist, ChecklistItem } from '../types';
 
 export default function CardDetailScreen({ route, navigation }: CardDetailScreenProps) {
-  const { boardId, listId, cardId } = route.params;
+  const { boardId, listId, cardId, fromTab } = route.params;
   const { getBoard, getList, getCard, updateCard, deleteCard, moveCard } = useApp();
 
   const board = getBoard(boardId);
@@ -45,10 +46,18 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
     await updateCard(boardId, listId, updated);
   };
 
+  const goBack = () => {
+    if (fromTab) {
+      navigation.navigate(fromTab as never);
+    } else {
+      navigation.goBack();
+    }
+  };
+
   const handleDelete = () => {
     Alert.alert('Delete Card', `Delete "${card.title}"?`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => { deleteCard(boardId, listId, cardId); navigation.goBack(); } },
+      { text: 'Delete', style: 'destructive', onPress: () => { deleteCard(boardId, listId, cardId); goBack(); } },
     ]);
   };
 
@@ -114,8 +123,8 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { saveCard(); navigation.goBack(); }}>
-          <Text style={styles.backText}>← Back</Text>
+        <TouchableOpacity onPress={() => { saveCard(); goBack(); }}>
+          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Card Details</Text>
         <TouchableOpacity onPress={handleDelete}>
@@ -260,7 +269,7 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
             <Text style={styles.modalTitle}>Move to List</Text>
             {board?.lists.map((l) => (
               <TouchableOpacity key={l.id} style={styles.moveItem} onPress={() => {
-                if (l.id !== listId) { moveCard(boardId, listId, l.id, cardId, l.cards.length); navigation.goBack(); }
+                if (l.id !== listId) { moveCard(boardId, listId, l.id, cardId, l.cards.length); goBack(); }
                 setMoveModalVisible(false);
               }}>
                 <Text style={styles.moveItemText}>{l.title}</Text>

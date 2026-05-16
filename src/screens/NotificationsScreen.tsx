@@ -28,7 +28,7 @@ export default function NotificationsScreen({ navigation }: NotificationsScreenP
     if (loc) {
       navigation.navigate('SpaceTab', {
         screen: 'CardDetail',
-        params: { boardId: loc.boardId, listId: loc.listId, cardId: loc.card.id },
+        params: { boardId: loc.boardId, listId: loc.listId, cardId: loc.card.id, fromTab: 'NotificationsTab' },
       });
     }
   };

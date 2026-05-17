@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { Logo } from '../../App';
 import { boardBackgroundColors } from '../constants/colors';
 import { OnboardingScreenProps } from '../types/navigation';
 

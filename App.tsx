@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
+import { useFonts, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { AppProvider, useApp } from './src/context/AppContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -102,11 +103,13 @@ function MainTabs() {
 
 function RootNavigator() {
   const { onboardingComplete, loading } = useApp();
+  const { colors } = useTheme();
+  const [fontsLoaded] = useFonts({ Poppins_700Bold });
 
-  if (loading) {
+  if (loading || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
-        <Text style={{ fontSize: 16, color: '#9CA3AF' }}>Loading...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 28, fontFamily: 'Poppins_700Bold', color: colors.primary, letterSpacing: 1 }}>Notiva</Text>
       </View>
     );
   }
@@ -119,6 +122,15 @@ function RootNavigator() {
         <Stack.Screen name="Main" component={MainTabs} />
       )}
     </Stack.Navigator>
+  );
+}
+
+export function Logo({ size = 28, color }: { size?: number; color?: string }) {
+  const { colors: themeColors } = useTheme();
+  return (
+    <Text style={{ fontSize: size, fontFamily: 'Poppins_700Bold', color: color || themeColors.primary, letterSpacing: 1 }}>
+      Notiva
+    </Text>
   );
 }
 

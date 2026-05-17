@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Ale
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { Logo } from '../../App';
 import { storage } from '../storage/storage';
 import { isOverdue, isToday } from '../utils/helpers';
 import { HomeScreenNavigationProp } from '../types/navigation';
@@ -117,7 +118,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.welcome}>
-          <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back</Text>
+          <Logo size={22} />
           <View style={styles.welcomeRow}>
             <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
             <View style={styles.themeToggle}>

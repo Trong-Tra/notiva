@@ -124,8 +124,10 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
               <TouchableOpacity onPress={() => navigation.navigate('Support' as never)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.primary} />
               </TouchableOpacity>
-              <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={20} color={colors.textMuted} />
-              <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: colors.border, true: colors.primary }} thumbColor={colors.surface} style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }} />
+              <View style={styles.themeRow}>
+                <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={16} color={colors.textMuted} />
+                <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: colors.border, true: colors.primary }} thumbColor={colors.surface} style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} />
+              </View>
             </View>
           </View>
           <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
@@ -317,8 +319,9 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
 
 const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 },
+  headerActions: { flexDirection: 'column', alignItems: 'flex-end', gap: 4 },
+  themeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   scroll: { padding: 20, paddingBottom: 40 },
   welcome: { marginBottom: 20 },
   greeting: { fontSize: 15, color: colors.textSecondary, fontWeight: '500' },

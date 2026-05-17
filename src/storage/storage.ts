@@ -4,6 +4,7 @@ import { Board, Space } from '../types';
 const BOARDS_KEY = '@trello_clone_boards';
 const SPACE_KEY = '@trello_clone_space';
 const ONBOARDING_KEY = '@trello_clone_onboarding';
+const THEME_DARK_KEY = '@trello_clone_theme_dark';
 
 export const storage = {
   async getBoards(): Promise<Board[]> {
@@ -60,9 +61,26 @@ export const storage = {
     }
   },
 
+  async getThemeDark(): Promise<boolean> {
+    try {
+      const data = await AsyncStorage.getItem(THEME_DARK_KEY);
+      return data === 'true';
+    } catch (e) {
+      return false;
+    }
+  },
+
+  async setThemeDark(value: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(THEME_DARK_KEY, value ? 'true' : 'false');
+    } catch (e) {
+      console.error('Error saving theme:', e);
+    }
+  },
+
   async clearAll(): Promise<void> {
     try {
-      await AsyncStorage.multiRemove([BOARDS_KEY, SPACE_KEY, ONBOARDING_KEY]);
+      await AsyncStorage.multiRemove([BOARDS_KEY, SPACE_KEY, ONBOARDING_KEY, THEME_DARK_KEY]);
     } catch (e) {
       console.error('Error clearing storage:', e);
     }

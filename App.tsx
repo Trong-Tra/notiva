@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppProvider, useApp } from './src/context/AppContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SpaceScreen from './src/screens/SpaceScreen';
@@ -121,13 +122,20 @@ function RootNavigator() {
   );
 }
 
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  return <StatusBar style={isDark ? 'light' : 'dark'} />;
+}
+
 export default function App() {
   return (
     <AppProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <RootNavigator />
-      </NavigationContainer>
+      <ThemeProvider>
+        <NavigationContainer>
+          <ThemedStatusBar />
+          <RootNavigator />
+        </NavigationContainer>
+      </ThemeProvider>
     </AppProvider>
   );
 }

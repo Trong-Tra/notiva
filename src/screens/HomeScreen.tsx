@@ -1,14 +1,23 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Alert, TextInput } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { storage } from '../storage/storage';
 import { colors } from '../constants/colors';
 import { isOverdue, isToday } from '../utils/helpers';
 import { HomeScreenNavigationProp } from '../types/navigation';
+import { Board, Card, BoardList } from '../types';
 import PieChart from '../components/PieChart';
+
+type SearchResult =
+  | { type: 'board'; item: Board }
+  | { type: 'list'; item: BoardList; board: Board }
+  | { type: 'card'; item: Card; board: Board; list: BoardList };
 
 export default function HomeScreen({ navigation }: { navigation: HomeScreenNavigationProp }) {
   const { space, boards, getStats, getAllCardsWithDueDates, loadMockData } = useApp();
+  const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   const stats = getStats();
   const dueCards = getAllCardsWithDueDates();
   const todayCards = dueCards.filter((c) => isToday(c.dueDate) && !c.isCompleted);
@@ -21,13 +30,130 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
     { value: Math.max(0, stats.totalCards - stats.completedCards - stats.overdueCards), color: colors.primary, label: 'Current' },
   ].filter((d) => d.value > 0);
 
+  const searchResults = useMemo<SearchResult[]>(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const results: SearchResult[] = [];
+
+    boards.forEach((board) => {
+      if (board.title.toLowerCase().includes(q)) {
+        results.push({ type: 'board', item: board });
+      }
+      board.lists.forEach((list) => {
+        if (list.title.toLowerCase().includes(q)) {
+          results.push({ type: 'list', item: list, board });
+        }
+        list.cards.forEach((card) => {
+          if (card.title.toLowerCase().includes(q) || card.description.toLowerCase().includes(q)) {
+            results.push({ type: 'card', item: card, board, list });
+          }
+        });
+      });
+    });
+
+    return results.slice(0, 20);
+  }, [query, boards]);
+
+  const navigateToResult = (result: SearchResult) => {
+    setQuery('');
+    setSearchFocused(false);
+    if (result.type === 'board') {
+      navigation.navigate('SpaceTab', { screen: 'BoardDetail', params: { boardId: result.item.id } });
+    } else if (result.type === 'list') {
+      navigation.navigate('SpaceTab', { screen: 'BoardDetail', params: { boardId: result.board.id } });
+    } else {
+      navigation.navigate('SpaceTab', {
+        screen: 'CardDetail',
+        params: { boardId: result.board.id, listId: result.list.id, cardId: result.item.id, fromTab: 'HomeTab' },
+      });
+    }
+  };
+
+  const renderResult = (result: SearchResult, index: number) => {
+    const isLast = index === searchResults.length - 1;
+    if (result.type === 'board') {
+      return (
+        <TouchableOpacity key={`b-${result.item.id}`} style={[styles.resultRow, isLast && styles.resultRowLast]} onPress={() => navigateToResult(result)}>
+          <View style={[styles.resultIcon, { backgroundColor: result.item.backgroundColor }]} />
+          <View style={styles.resultBody}>
+            <Text style={styles.resultTitle}>{result.item.title}</Text>
+            <Text style={styles.resultMeta}>Board · {result.item.lists.length} lists</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </TouchableOpacity>
+      );
+    }
+    if (result.type === 'list') {
+      return (
+        <TouchableOpacity key={`l-${result.item.id}`} style={[styles.resultRow, isLast && styles.resultRowLast]} onPress={() => navigateToResult(result)}>
+          <View style={[styles.resultIcon, { backgroundColor: '#E5E7EB' }]}>
+            <Ionicons name="list-outline" size={14} color={colors.textSecondary} />
+          </View>
+          <View style={styles.resultBody}>
+            <Text style={styles.resultTitle}>{result.item.title}</Text>
+            <Text style={styles.resultMeta}>List in {result.board.title}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </TouchableOpacity>
+      );
+    }
+    return (
+      <TouchableOpacity key={`c-${result.item.id}`} style={[styles.resultRow, isLast && styles.resultRowLast]} onPress={() => navigateToResult(result)}>
+        <View style={[styles.resultIcon, { backgroundColor: result.item.isCompleted ? colors.success : colors.primary }]}>
+          <Ionicons name={result.item.isCompleted ? 'checkmark' : 'document-text-outline'} size={14} color="#fff" />
+        </View>
+        <View style={styles.resultBody}>
+          <Text style={[styles.resultTitle, result.item.isCompleted && styles.resultTitleDone]}>{result.item.title}</Text>
+          <Text style={styles.resultMeta}>Card in {result.list.title} · {result.board.title}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.welcome}>
           <Text style={styles.greeting}>Welcome back</Text>
           <Text style={styles.spaceName}>{space?.name || 'Your Workspace'}</Text>
         </View>
+
+        <View style={styles.searchBar}>
+          <Ionicons name="search-outline" size={18} color={colors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search boards, lists, cards..."
+            placeholderTextColor="#9CA3AF"
+            value={query}
+            onChangeText={setQuery}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+          />
+          {query.length > 0 && (
+            <TouchableOpacity onPress={() => setQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {query.trim().length > 0 && (
+          <View style={[styles.section, { marginBottom: 16 }]}>
+            <Text style={styles.sectionTitle}>
+              {searchResults.length > 0 ? `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}` : 'No results'}
+            </Text>
+            {searchResults.length > 0 ? (
+              <View style={styles.resultsBox}>
+                {searchResults.map((r, i) => renderResult(r, i))}
+              </View>
+            ) : (
+              <View style={styles.emptyResults}>
+                <Ionicons name="search" size={28} color="#D1D5DB" />
+                <Text style={styles.emptyResultsText}>No matches found</Text>
+              </View>
+            )}
+          </View>
+        )}
 
         <View style={styles.overviewCard}>
           <View style={styles.overviewLeft}>
@@ -71,7 +197,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
                 <Text style={styles.tableTitle}>Boards</Text>
                 <Text style={styles.tableSubtitle}>View and manage your boards</Text>
               </View>
-              <Text style={styles.tableArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
             <View style={styles.tableDivider} />
             <TouchableOpacity style={styles.tableRow} onPress={() => navigation.navigate('CalendarTab')}>
@@ -79,7 +205,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
                 <Text style={styles.tableTitle}>Calendar</Text>
                 <Text style={styles.tableSubtitle}>See tasks by due date</Text>
               </View>
-              <Text style={styles.tableArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
             <View style={styles.tableDivider} />
             <TouchableOpacity style={styles.tableRow} onPress={() => navigation.navigate('NotificationsTab')}>
@@ -87,7 +213,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
                 <Text style={styles.tableTitle}>Alerts</Text>
                 <Text style={styles.tableSubtitle}>Upcoming and overdue tasks</Text>
               </View>
-              <Text style={styles.tableArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
             <View style={styles.tableDivider} />
             <TouchableOpacity style={styles.tableRow} onPress={() => navigation.navigate('DashboardTab')}>
@@ -95,7 +221,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
                 <Text style={styles.tableTitle}>Dashboard</Text>
                 <Text style={styles.tableSubtitle}>Track your progress</Text>
               </View>
-              <Text style={styles.tableArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
@@ -127,7 +253,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
                   <Text style={styles.recentTitle}>{board.title}</Text>
                   <Text style={styles.recentMeta}>{board.lists.length} lists · {board.lists.reduce((a, l) => a + l.cards.length, 0)} cards</Text>
                 </View>
-                <Text style={styles.recentArrow}>›</Text>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
               </TouchableOpacity>
             ))}
           </View>
@@ -180,9 +306,23 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   scroll: { padding: 20, paddingBottom: 40 },
-  welcome: { marginBottom: 24 },
+  welcome: { marginBottom: 20 },
   greeting: { fontSize: 15, color: colors.textSecondary, fontWeight: '500' },
   spaceName: { fontSize: 28, fontWeight: '800', color: colors.textPrimary, marginTop: 4, letterSpacing: -0.5 },
+  searchBar: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0', paddingHorizontal: 14, paddingVertical: 10, marginBottom: 20 },
+  searchInput: { flex: 1, fontSize: 15, color: colors.textPrimary, paddingVertical: 2 },
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
+  resultsBox: { borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
+  resultRow: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+  resultRowLast: { borderBottomWidth: 0 },
+  resultIcon: { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  resultBody: { flex: 1 },
+  resultTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
+  resultTitleDone: { textDecorationLine: 'line-through', color: colors.textMuted },
+  resultMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  emptyResults: { alignItems: 'center', paddingVertical: 30 },
+  emptyResultsText: { fontSize: 14, color: colors.textMuted, marginTop: 8, fontWeight: '500' },
   overviewCard: { flexDirection: 'row', backgroundColor: '#F9FAFB', borderRadius: 16, borderWidth: 1, borderColor: '#F0F0F0', padding: 20, marginBottom: 28, alignItems: 'center' },
   overviewLeft: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   overviewRight: { flex: 1, paddingLeft: 16, gap: 12 },
@@ -193,14 +333,11 @@ const styles = StyleSheet.create({
   overviewValue: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
   emptyChart: { width: 140, height: 140, borderRadius: 70, borderWidth: 4, borderColor: '#E5E7EB', justifyContent: 'center', alignItems: 'center' },
   emptyChartText: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
   table: { borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
   tableRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, backgroundColor: '#fff' },
   tableDivider: { height: 1, backgroundColor: '#F0F0F0', marginLeft: 16 },
   tableTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   tableSubtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
-  tableArrow: { fontSize: 20, color: colors.textMuted, fontWeight: '300' },
   taskRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#F0F0F0' },
   taskDot: { width: 8, height: 8, borderRadius: 4, marginRight: 10 },
   taskText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.textPrimary },
@@ -210,7 +347,6 @@ const styles = StyleSheet.create({
   recentInfo: { flex: 1 },
   recentTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   recentMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  recentArrow: { fontSize: 20, color: colors.textMuted, fontWeight: '300' },
   actionRow: { flexDirection: 'row', gap: 12, marginTop: 20, justifyContent: 'center' },
   actionBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, borderWidth: 1, borderColor: '#E5E7EB' },
   actionText: { fontSize: 13, color: colors.primary, fontWeight: '600' },

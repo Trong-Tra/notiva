@@ -122,7 +122,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
             <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
             <View style={styles.themeToggle}>
               <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={16} color={colors.textMuted} />
-              <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: '#E5E7EB', true: colors.primary }} thumbColor="#fff" />
+              <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: colors.border, true: colors.primary }} thumbColor={colors.surface} />
             </View>
           </View>
         </View>

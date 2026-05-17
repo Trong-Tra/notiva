@@ -42,7 +42,7 @@ const getStyles = (colors: ThemeColors) => StyleSheet.create({
   modalInput: { backgroundColor: colors.surfaceHover, borderRadius: 10, borderWidth: 1, borderColor: colors.border, padding: 14, fontSize: 16, color: colors.textPrimary, marginBottom: 20 },
   colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
   colorDot: { width: 36, height: 36, borderRadius: 18 },
-  colorDotActive: { borderWidth: 3, borderColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  colorDotActive: { borderWidth: 3, borderColor: colors.surface, shadowColor: colors.textPrimary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
   modalActions: { flexDirection: 'row', alignItems: 'center' },
   modalDelete: { color: colors.error, fontSize: 15, fontWeight: '600' },
   modalCancel: { paddingVertical: 10, paddingHorizontal: 16, marginRight: 8 },

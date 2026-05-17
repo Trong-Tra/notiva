@@ -118,22 +118,17 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.welcome}>
-          <Logo size={22} />
-          <View style={styles.welcomeRow}>
-            <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
-            <View style={styles.themeToggle}>
-              <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={16} color={colors.textMuted} />
-              <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: colors.border, true: colors.primary }} thumbColor={colors.surface} />
+          <View style={styles.headerRow}>
+            <Logo size={22} />
+            <View style={styles.headerActions}>
+              <TouchableOpacity onPress={() => navigation.navigate('Support' as never)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.primary} />
+              </TouchableOpacity>
+              <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={20} color={colors.textMuted} />
+              <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: colors.border, true: colors.primary }} thumbColor={colors.surface} style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }} />
             </View>
           </View>
-          <TouchableOpacity
-            style={[styles.supportBtn, { backgroundColor: colors.surfaceHover, borderColor: colors.border }]}
-            onPress={() => navigation.navigate('Support' as never)}
-          >
-            <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.primary} />
-            <Text style={[styles.supportText, { color: colors.primary }]}>Customer Support</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </TouchableOpacity>
+          <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
         </View>
 
         <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -322,10 +317,8 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
 
 const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  welcomeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  themeToggle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  supportBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10, borderWidth: 1, alignSelf: 'flex-start' },
-  supportText: { fontSize: 13, fontWeight: '600' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   scroll: { padding: 20, paddingBottom: 40 },
   welcome: { marginBottom: 20 },
   greeting: { fontSize: 15, color: colors.textSecondary, fontWeight: '500' },

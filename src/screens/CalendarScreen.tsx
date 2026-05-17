@@ -16,7 +16,7 @@ interface MarkedDate {
 }
 
 export default function CalendarScreen({ navigation }: CalendarScreenProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = getStyles(colors);
   const { boards, createCard } = useApp();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -134,6 +134,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
       </View>
 
       <Calendar
+        key={isDark ? 'dark' : 'light'}
         style={styles.calendar}
         theme={{
           todayTextColor: colors.primary,
@@ -147,6 +148,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
           calendarBackground: colors.surface,
           dayTextColor: colors.textPrimary,
           textDisabledColor: colors.textMuted,
+          textSectionTitleColor: colors.textSecondary,
           dotStyle: { width: 5, height: 5, borderRadius: 3 },
         }}
         markedDates={markedDates}

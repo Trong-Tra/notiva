@@ -41,6 +41,7 @@ const TAB_ICONS: Record<string, { active: keyof typeof Ionicons.glyphMap; inacti
 };
 
 function TabIcon({ focused, routeName }: { focused: boolean; routeName: string }) {
+  const { colors } = useTheme();
   const icons = TAB_ICONS[routeName];
   if (!icons) return null;
   const name = focused ? icons.active : icons.inactive;
@@ -48,27 +49,28 @@ function TabIcon({ focused, routeName }: { focused: boolean; routeName: string }
     <Ionicons
       name={name}
       size={22}
-      color={focused ? '#0052CC' : '#9CA3AF'}
+      color={focused ? colors.primary : colors.textMuted}
     />
   );
 }
 
 function MainTabs() {
+  const { colors, isDark } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ focused }) => <TabIcon focused={focused} routeName={route.name} />,
-        tabBarActiveTintColor: '#0052CC',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarStyle: {
           height: 88,
           paddingTop: 8,
           paddingBottom: 24,
           borderTopWidth: 1,
-          borderTopColor: '#F0F0F0',
-          backgroundColor: '#fff',
+          borderTopColor: colors.border,
+          backgroundColor: colors.surface,
         },
       })}
     >

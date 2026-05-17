@@ -19,31 +19,58 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
+const FAQS = [
+  {
+    q: 'How do I create a board?',
+    a: 'Go to the Space tab, tap "+ New Board", enter a title, pick a color, and hit Create.',
+  },
+  {
+    q: 'How do I move a card?',
+    a: 'Long-press any card in a board to open the action sheet. Choose "Move to Another List" or reorder with Move Up / Down.',
+  },
+  {
+    q: 'How do notifications work?',
+    a: 'When you set a due date on a card, Notiva schedules a local notification for 9 AM that day. It auto-cancels if you complete or delete the card.',
+  },
+  {
+    q: 'How do I reset my data?',
+    a: 'On the Home screen, scroll to the bottom and tap "Reset App Data". This wipes everything and restores the app to its initial state.',
+  },
+  {
+    q: 'How do I enable dark mode?',
+    a: 'On the Home screen, tap the moon icon in the top-right corner and toggle the switch. Your preference is saved automatically.',
+  },
+  {
+    q: 'Can I search across all boards?',
+    a: 'Yes! Use the search bar on the Home screen. It finds boards, lists, and cards by title in real time.',
+  },
+];
+
 export default function SupportScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const userMsg: Message = { id: Date.now().toString(), text: input.trim(), sender: 'user' };
+  const sendMessage = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const userMsg: Message = { id: Date.now().toString(), text: trimmed, sender: 'user' };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
 
-    // Auto-reply after a short delay
+    const faq = FAQS.find((f) => f.q === trimmed);
+    const replyText = faq
+      ? faq.a
+      : "Thanks for reaching out! Our team will review your message and get back to you as soon as possible.";
+
     setTimeout(() => {
-      const replies = [
-        'Thanks for reaching out! Our team will get back to you soon.',
-        'Got it. Is there anything else I can help with?',
-        'Thank you! We have received your message.',
-      ];
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: replies[Math.floor(Math.random() * replies.length)],
+        text: replyText,
         sender: 'bot',
       };
       setMessages((prev) => [...prev, botMsg]);
-    }, 800);
+    }, 600);
   };
 
   const styles = getStyles(colors);
@@ -65,9 +92,16 @@ export default function SupportScreen({ navigation }: any) {
           showsVerticalScrollIndicator={false}
         >
           {messages.length === 0 && (
-            <View style={styles.placeholderWrap}>
+            <>
               <Text style={styles.placeholder}>ask notiva anything</Text>
-            </View>
+              <View style={styles.faqWrap}>
+                {FAQS.map((f, i) => (
+                  <TouchableOpacity key={i} style={styles.faqChip} onPress={() => sendMessage(f.q)}>
+                    <Text style={styles.faqText} numberOfLines={1}>{f.q}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
           )}
 
           {messages.map((msg) => (
@@ -95,7 +129,7 @@ export default function SupportScreen({ navigation }: any) {
             multiline
             maxLength={500}
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} disabled={!input.trim()}>
+          <TouchableOpacity style={styles.sendBtn} onPress={() => sendMessage(input)} disabled={!input.trim()}>
             <Ionicons name="send" size={18} color={input.trim() ? '#fff' : colors.textMuted} />
           </TouchableOpacity>
         </View>
@@ -119,16 +153,26 @@ const getStyles = (colors: any) =>
     },
     headerTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
     chatArea: { flex: 1 },
-    chatEmpty: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    chatEmpty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
     chatContent: { padding: 16, paddingBottom: 8 },
-    placeholderWrap: { alignItems: 'center' },
     placeholder: {
       fontSize: 18,
       fontWeight: '600',
       color: colors.textMuted,
       opacity: 0.35,
       letterSpacing: 0.5,
+      marginBottom: 20,
     },
+    faqWrap: { width: '100%', gap: 8 },
+    faqChip: {
+      backgroundColor: colors.surfaceHover,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+    },
+    faqText: { fontSize: 14, fontWeight: '500', color: colors.textPrimary },
     bubble: {
       maxWidth: '80%',
       paddingHorizontal: 14,

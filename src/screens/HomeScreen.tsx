@@ -119,7 +119,10 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.welcome}>
           <View style={styles.headerRow}>
-            <Logo size={22} />
+            <View>
+              <Logo size={22} />
+              <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
+            </View>
             <View style={styles.headerActions}>
               <TouchableOpacity onPress={() => navigation.navigate('Support' as never)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.primary} />
@@ -130,7 +133,6 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
               </View>
             </View>
           </View>
-          <Text style={[styles.spaceName, { color: colors.textPrimary }]}>{space?.name || 'Your Workspace'}</Text>
         </View>
 
         <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>

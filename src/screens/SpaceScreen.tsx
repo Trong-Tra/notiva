@@ -1,10 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { colors, boardBackgroundColors } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
+import { boardBackgroundColors, ThemeColors } from '../constants/colors';
 import { SpaceScreenProps } from '../types/navigation';
 
+const getStyles = (colors: ThemeColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
+  newBtn: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8 },
+  newBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  scroll: { padding: 20, paddingBottom: 40 },
+  section: { marginBottom: 28 },
+  sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  gridItem: { width: '48%' },
+  boardCard: { backgroundColor: colors.surfaceHover, borderRadius: 12, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  cardTop: { height: 6, width: '100%' },
+  cardBody: { padding: 14 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 10, minHeight: 40 },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cardMeta: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+  star: { fontSize: 16, color: colors.border },
+  starActive: { color: colors.warning },
+  createTile: { backgroundColor: colors.surfaceHover, borderRadius: 12, borderWidth: 1.5, borderColor: colors.border, borderStyle: 'dashed', minHeight: 90, justifyContent: 'center', alignItems: 'center' },
+  createTileInner: { alignItems: 'center' },
+  createTilePlus: { fontSize: 24, color: colors.textMuted, fontWeight: '300', marginBottom: 4 },
+  createTileText: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
+  empty: { alignItems: 'center', paddingVertical: 40 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
+  emptyText: { fontSize: 14, color: colors.textMuted, marginBottom: 20, textAlign: 'center' },
+  emptyBtn: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
+  emptyBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
+  modalDismiss: { flex: 1 },
+  modalSheet: { backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingBottom: 36, paddingTop: 10 },
+  modalHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 20 },
+  modalLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginBottom: 8 },
+  modalInput: { backgroundColor: colors.surfaceHover, borderRadius: 10, borderWidth: 1, borderColor: colors.border, padding: 14, fontSize: 16, color: colors.textPrimary, marginBottom: 20 },
+  colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
+  colorDot: { width: 36, height: 36, borderRadius: 18 },
+  colorDotActive: { borderWidth: 3, borderColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  modalActions: { flexDirection: 'row', alignItems: 'center' },
+  modalDelete: { color: colors.error, fontSize: 15, fontWeight: '600' },
+  modalCancel: { paddingVertical: 10, paddingHorizontal: 16, marginRight: 8 },
+  modalCancelText: { color: colors.textMuted, fontSize: 15, fontWeight: '600' },
+  modalConfirm: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 22, borderRadius: 10 },
+  modalConfirmDisabled: { backgroundColor: colors.border },
+  modalConfirmText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+});
+
 export default function SpaceScreen({ navigation }: SpaceScreenProps) {
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => getStyles(colors), [colors]);
   const { space, boards, createBoard, updateBoard, deleteBoard, toggleStarBoard } = useApp();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingBoard, setEditingBoard] = useState<ReturnType<typeof createBoard> | null>(null);
@@ -126,7 +176,7 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>{editingBoard ? 'Edit Board' : 'New Board'}</Text>
                 <Text style={styles.modalLabel}>Title</Text>
-                <TextInput style={styles.modalInput} placeholder="Board name" placeholderTextColor="#9CA3AF" value={title} onChangeText={setTitle} autoFocus maxLength={40} />
+                <TextInput style={styles.modalInput} placeholder="Board name" placeholderTextColor={colors.textMuted} value={title} onChangeText={setTitle} autoFocus maxLength={40} />
                 <Text style={styles.modalLabel}>Color</Text>
                 <View style={styles.colorRow}>
                   {boardBackgroundColors.map((color) => (
@@ -155,50 +205,3 @@ export default function SpaceScreen({ navigation }: SpaceScreenProps) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
-  newBtn: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8 },
-  newBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  scroll: { padding: 20, paddingBottom: 40 },
-  section: { marginBottom: 28 },
-  sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  gridItem: { width: '48%' },
-  boardCard: { backgroundColor: '#F9FAFB', borderRadius: 12, borderWidth: 1, borderColor: '#F0F0F0', overflow: 'hidden' },
-  cardTop: { height: 6, width: '100%' },
-  cardBody: { padding: 14 },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 10, minHeight: 40 },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardMeta: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
-  star: { fontSize: 16, color: '#D1D5DB' },
-  starActive: { color: '#F59E0B' },
-  createTile: { backgroundColor: '#FAFAFA', borderRadius: 12, borderWidth: 1.5, borderColor: '#E5E7EB', borderStyle: 'dashed', minHeight: 90, justifyContent: 'center', alignItems: 'center' },
-  createTileInner: { alignItems: 'center' },
-  createTilePlus: { fontSize: 24, color: colors.textMuted, fontWeight: '300', marginBottom: 4 },
-  createTileText: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
-  empty: { alignItems: 'center', paddingVertical: 40 },
-  emptyTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
-  emptyText: { fontSize: 14, color: colors.textMuted, marginBottom: 20, textAlign: 'center' },
-  emptyBtn: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
-  emptyBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
-  modalDismiss: { flex: 1 },
-  modalSheet: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingBottom: 36, paddingTop: 10 },
-  modalHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: '#E5E7EB', alignSelf: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 20 },
-  modalLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginBottom: 8 },
-  modalInput: { backgroundColor: '#F9FAFB', borderRadius: 10, borderWidth: 1, borderColor: '#E5E7EB', padding: 14, fontSize: 16, color: colors.textPrimary, marginBottom: 20 },
-  colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
-  colorDot: { width: 36, height: 36, borderRadius: 18 },
-  colorDotActive: { borderWidth: 3, borderColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
-  modalActions: { flexDirection: 'row', alignItems: 'center' },
-  modalDelete: { color: colors.error, fontSize: 15, fontWeight: '600' },
-  modalCancel: { paddingVertical: 10, paddingHorizontal: 16, marginRight: 8 },
-  modalCancelText: { color: colors.textMuted, fontSize: 15, fontWeight: '600' },
-  modalConfirm: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 22, borderRadius: 10 },
-  modalConfirmDisabled: { backgroundColor: '#D1D5DB' },
-  modalConfirmText: { color: '#fff', fontSize: 15, fontWeight: '600' },
-});

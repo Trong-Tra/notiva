@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal,
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useApp } from '../context/AppContext';
-import { colors, labelColors } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
+import { labelColors } from '../constants/colors';
 import { formatDate, formatTime, generateId } from '../utils/helpers';
 import { CardDetailScreenProps } from '../types/navigation';
 import { Label, Checklist, ChecklistItem } from '../types';
@@ -11,6 +12,7 @@ import { Label, Checklist, ChecklistItem } from '../types';
 export default function CardDetailScreen({ route, navigation }: CardDetailScreenProps) {
   const { boardId, listId, cardId, fromTab } = route.params;
   const { getBoard, getList, getCard, updateCard, deleteCard, moveCard } = useApp();
+  const { colors } = useTheme();
 
   const board = getBoard(boardId);
   const list = getList(boardId, listId);
@@ -33,10 +35,12 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
   const [newItemInputs, setNewItemInputs] = useState<Record<string, string>>({});
   const [moveModalVisible, setMoveModalVisible] = useState(false);
 
+  const styles = getStyles(colors);
+
   if (!card) {
     return (
       <View style={styles.container}>
-        <Text>Card not found</Text>
+        <Text style={{ color: colors.textPrimary }}>Card not found</Text>
       </View>
     );
   }
@@ -236,14 +240,14 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Add Label</Text>
-            <TextInput style={styles.modalInput} placeholder="Label name" value={newLabelName} onChangeText={setNewLabelName} autoFocus />
+            <TextInput style={styles.modalInput} placeholder="Label name" placeholderTextColor={colors.textSecondary} value={newLabelName} onChangeText={setNewLabelName} autoFocus />
             <View style={styles.colorGrid}>
               {labelColors.map((color) => (
                 <TouchableOpacity key={color} style={[styles.colorCircle, { backgroundColor: color }, selectedLabelColor === color && styles.colorSelected]} onPress={() => setSelectedLabelColor(color)} />
               ))}
             </View>
             <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setLabelModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setLabelModalVisible(false)}><Text style={{ color: colors.textPrimary }}>Cancel</Text></TouchableOpacity>
               <TouchableOpacity style={styles.modalBtnPrimary} onPress={() => { addLabel(); setLabelModalVisible(false); }}><Text style={{ color: '#fff' }}>Add</Text></TouchableOpacity>
             </View>
           </View>
@@ -254,9 +258,9 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Add Checklist</Text>
-            <TextInput style={styles.modalInput} placeholder="Checklist title" value={newChecklistTitle} onChangeText={setNewChecklistTitle} autoFocus />
+            <TextInput style={styles.modalInput} placeholder="Checklist title" placeholderTextColor={colors.textSecondary} value={newChecklistTitle} onChangeText={setNewChecklistTitle} autoFocus />
             <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setChecklistModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setChecklistModalVisible(false)}><Text style={{ color: colors.textPrimary }}>Cancel</Text></TouchableOpacity>
               <TouchableOpacity style={styles.modalBtnPrimary} onPress={addChecklist}><Text style={{ color: '#fff' }}>Add</Text></TouchableOpacity>
             </View>
           </View>
@@ -276,7 +280,7 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
               </TouchableOpacity>
             ))}
             <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setMoveModalVisible(false)}>
-              <Text style={{ textAlign: 'center' }}>Cancel</Text>
+              <Text style={{ color: colors.textPrimary, textAlign: 'center' }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -285,62 +289,64 @@ export default function CardDetailScreen({ route, navigation }: CardDetailScreen
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
-  backText: { color: colors.primary, fontSize: 16, fontWeight: '600' },
-  headerTitle: { fontSize: 17, fontWeight: '600', color: colors.textPrimary },
-  deleteText: { color: colors.error, fontSize: 14 },
-  content: { flex: 1, padding: 16 },
-  titleInput: { fontSize: 22, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 16, padding: 8, backgroundColor: colors.surface, borderRadius: 8 },
-  section: { marginBottom: 20, backgroundColor: colors.surface, padding: 12, borderRadius: 8 },
-  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, backgroundColor: colors.surface, padding: 12, borderRadius: 8 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  sectionTitle: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  metaValue: { fontSize: 15, color: colors.textPrimary },
-  descInput: { fontSize: 15, color: colors.textPrimary, minHeight: 80, textAlignVertical: 'top', backgroundColor: colors.background, borderRadius: 6, padding: 10 },
-  dateRow: { marginBottom: 8 },
-  dateDisplay: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  dateText: { fontSize: 15, color: colors.textPrimary },
-  clearText: { color: colors.error, fontSize: 14 },
-  dateButtons: { flexDirection: 'row', gap: 10 },
-  dateBtn: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 6, marginTop: 4 },
-  dateBtnText: { color: '#fff', fontSize: 14 },
-  timeToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
-  smallText: { fontSize: 14, color: colors.textSecondary },
-  placeholderText: { color: colors.textSecondary, fontSize: 14, fontStyle: 'italic' },
-  labelList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  labelChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 4, gap: 6 },
-  labelChipText: { color: '#fff', fontSize: 12, fontWeight: '600' },
-  labelChipRemove: { color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 'bold' },
-  addLink: { color: colors.primary, fontSize: 14, fontWeight: '600' },
-  checklistBox: { marginTop: 10, padding: 10, backgroundColor: colors.background, borderRadius: 6 },
-  checklistHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  checklistTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-  progressBar: { height: 6, backgroundColor: colors.border, borderRadius: 3, marginBottom: 4 },
-  progressFill: { height: 6, backgroundColor: colors.success, borderRadius: 3 },
-  progressText: { fontSize: 11, color: colors.textSecondary, marginBottom: 8 },
-  checkItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, gap: 10 },
-  checkbox: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: colors.textSecondary, justifyContent: 'center', alignItems: 'center' },
-  checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
-  checkmark: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  checkItemText: { flex: 1, fontSize: 14, color: colors.textPrimary },
-  checkItemTextChecked: { textDecorationLine: 'line-through', color: colors.textSecondary },
-  itemDelete: { color: colors.error, fontSize: 16, paddingHorizontal: 4 },
-  addItemRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
-  addItemInput: { flex: 1, backgroundColor: colors.surface, borderRadius: 4, padding: 8, fontSize: 14, color: colors.textPrimary },
-  moveBtn: { backgroundColor: colors.surface, padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
-  moveBtnText: { color: colors.primary, fontSize: 15, fontWeight: '600' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalBox: { backgroundColor: colors.surface, borderRadius: 12, padding: 20, width: '100%', maxWidth: 400 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 12 },
-  modalInput: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, fontSize: 16, marginBottom: 16, color: colors.textPrimary },
-  colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
-  colorCircle: { width: 32, height: 32, borderRadius: 16 },
-  colorSelected: { borderWidth: 3, borderColor: colors.textPrimary },
-  modalRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
-  modalBtnSecondary: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: colors.background },
-  modalBtnPrimary: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
-  moveItem: { paddingVertical: 12, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
-  moveItemText: { fontSize: 15, color: colors.textPrimary },
-});
+function getStyles(colors: any) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
+    backText: { color: colors.primary, fontSize: 16, fontWeight: '600' },
+    headerTitle: { fontSize: 17, fontWeight: '600', color: colors.textPrimary },
+    deleteText: { color: colors.error, fontSize: 14 },
+    content: { flex: 1, padding: 16 },
+    titleInput: { fontSize: 22, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 16, padding: 8, backgroundColor: colors.surface, borderRadius: 8 },
+    section: { marginBottom: 20, backgroundColor: colors.surface, padding: 12, borderRadius: 8 },
+    sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, backgroundColor: colors.surface, padding: 12, borderRadius: 8 },
+    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    sectionTitle: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+    metaValue: { fontSize: 15, color: colors.textPrimary },
+    descInput: { fontSize: 15, color: colors.textPrimary, minHeight: 80, textAlignVertical: 'top', backgroundColor: colors.background, borderRadius: 6, padding: 10 },
+    dateRow: { marginBottom: 8 },
+    dateDisplay: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    dateText: { fontSize: 15, color: colors.textPrimary },
+    clearText: { color: colors.error, fontSize: 14 },
+    dateButtons: { flexDirection: 'row', gap: 10 },
+    dateBtn: { backgroundColor: colors.primary, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 6, marginTop: 4 },
+    dateBtnText: { color: '#fff', fontSize: 14 },
+    timeToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
+    smallText: { fontSize: 14, color: colors.textSecondary },
+    placeholderText: { color: colors.textSecondary, fontSize: 14, fontStyle: 'italic' },
+    labelList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    labelChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 4, gap: 6 },
+    labelChipText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+    labelChipRemove: { color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 'bold' },
+    addLink: { color: colors.primary, fontSize: 14, fontWeight: '600' },
+    checklistBox: { marginTop: 10, padding: 10, backgroundColor: colors.background, borderRadius: 6 },
+    checklistHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+    checklistTitle: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    progressBar: { height: 6, backgroundColor: colors.border, borderRadius: 3, marginBottom: 4 },
+    progressFill: { height: 6, backgroundColor: colors.success, borderRadius: 3 },
+    progressText: { fontSize: 11, color: colors.textSecondary, marginBottom: 8 },
+    checkItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, gap: 10 },
+    checkbox: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: colors.textSecondary, justifyContent: 'center', alignItems: 'center' },
+    checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
+    checkmark: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+    checkItemText: { flex: 1, fontSize: 14, color: colors.textPrimary },
+    checkItemTextChecked: { textDecorationLine: 'line-through', color: colors.textSecondary },
+    itemDelete: { color: colors.error, fontSize: 16, paddingHorizontal: 4 },
+    addItemRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
+    addItemInput: { flex: 1, backgroundColor: colors.surface, borderRadius: 4, padding: 8, fontSize: 14, color: colors.textPrimary },
+    moveBtn: { backgroundColor: colors.surface, padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
+    moveBtnText: { color: colors.primary, fontSize: 15, fontWeight: '600' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    modalBox: { backgroundColor: colors.surface, borderRadius: 12, padding: 20, width: '100%', maxWidth: 400 },
+    modalTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 12 },
+    modalInput: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, fontSize: 16, marginBottom: 16, color: colors.textPrimary },
+    colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
+    colorCircle: { width: 32, height: 32, borderRadius: 16 },
+    colorSelected: { borderWidth: 3, borderColor: colors.textPrimary },
+    modalRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
+    modalBtnSecondary: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: colors.background },
+    modalBtnPrimary: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
+    moveItem: { paddingVertical: 12, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
+    moveItemText: { fontSize: 15, color: colors.textPrimary },
+  });
+}

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
-import { colors } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import { formatDate, isOverdue } from '../utils/helpers';
 import { BoardDetailScreenProps } from '../types/navigation';
 import { Card } from '../types';
@@ -12,6 +12,8 @@ type CardAction = 'edit' | 'moveTop' | 'moveUp' | 'moveDown' | 'moveBottom' | 'm
 export default function BoardDetailScreen({ route, navigation }: BoardDetailScreenProps) {
   const { boardId } = route.params;
   const { getBoard, createList, updateList, deleteList, reorderLists, createCard, updateCard, deleteCard, moveCard, reorderCards } = useApp();
+  const { colors } = useTheme();
+  const styles = useMemo(() => getStyles(colors), [colors]);
 
   const board = getBoard(boardId);
   const [listModalVisible, setListModalVisible] = useState(false);
@@ -31,7 +33,7 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
   if (!board) {
     return (
       <View style={styles.container}>
-        <Text>Board not found</Text>
+        <Text style={{ color: colors.textPrimary }}>Board not found</Text>
       </View>
     );
   }
@@ -270,7 +272,7 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
     <View style={[styles.container, { backgroundColor: board.backgroundColor }]}>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Ionicons name="arrow-back" size={22} color="#fff" />
+          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.boardTitleText} numberOfLines={1}>{board.title}</Text>
         <View style={{ width: 36 }} />
@@ -278,7 +280,7 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.boardScroll}>
         {board.lists.map(renderList)}
         <TouchableOpacity style={styles.addListBtn} onPress={() => openListModal()}>
-          <Ionicons name="add" size={18} color="#fff" />
+          <Ionicons name="add" size={18} color={colors.textPrimary} />
           <Text style={styles.addListText}>Add another list</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -288,10 +290,14 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
               <Text style={styles.modalTitle}>{editingListId ? 'Edit List' : 'Add List'}</Text>
-              <TextInput style={styles.modalInput} placeholder="List title" value={listTitle} onChangeText={setListTitle} autoFocus />
+              <TextInput style={styles.modalInput} placeholder="List title" value={listTitle} onChangeText={setListTitle} placeholderTextColor={colors.textMuted} autoFocus />
               <View style={styles.modalRow}>
-                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setListModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveList}><Text style={{ color: '#fff' }}>{editingListId ? 'Save' : 'Add'}</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setListModalVisible(false)}>
+                  <Text style={{ color: colors.textPrimary }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveList}>
+                  <Text style={{ color: colors.textPrimary }}>{editingListId ? 'Save' : 'Add'}</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -303,10 +309,14 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
               <Text style={styles.modalTitle}>{editingCardId ? 'Edit Card' : 'Add Card'}</Text>
-              <TextInput style={styles.modalInput} placeholder="Card title" value={cardTitle} onChangeText={setCardTitle} autoFocus />
+              <TextInput style={styles.modalInput} placeholder="Card title" value={cardTitle} onChangeText={setCardTitle} placeholderTextColor={colors.textMuted} autoFocus />
               <View style={styles.modalRow}>
-                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setCardModalVisible(false)}><Text>Cancel</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveCard}><Text style={{ color: '#fff' }}>{editingCardId ? 'Save' : 'Add'}</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setCardModalVisible(false)}>
+                  <Text style={{ color: colors.textPrimary }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnPrimary} onPress={saveCard}>
+                  <Text style={{ color: colors.textPrimary }}>{editingCardId ? 'Save' : 'Add'}</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -324,7 +334,7 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
                 </TouchableOpacity>
               ))}
               <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setMoveModalVisible(false)}>
-                <Text style={{ textAlign: 'center' }}>Cancel</Text>
+                <Text style={{ color: colors.textPrimary, textAlign: 'center' }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -356,11 +366,11 @@ export default function BoardDetailScreen({ route, navigation }: BoardDetailScre
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 12 },
-  backText: { color: '#fff', fontSize: 16, fontWeight: '600', textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
-  boardTitleText: { color: '#fff', fontSize: 18, fontWeight: 'bold', textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2, maxWidth: 220, textAlign: 'center' },
+  backText: { color: colors.textPrimary, fontSize: 16, fontWeight: '600', textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
+  boardTitleText: { color: colors.textPrimary, fontSize: 18, fontWeight: 'bold', textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2, maxWidth: 220, textAlign: 'center' },
   boardScroll: { paddingHorizontal: 12, paddingVertical: 8, alignItems: 'flex-start' },
   listColumn: { width: 280, backgroundColor: colors.background, borderRadius: 8, marginRight: 12, maxHeight: '85%' },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
@@ -376,17 +386,17 @@ const styles = StyleSheet.create({
   labelRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 6 },
   labelDot: { width: 32, height: 6, borderRadius: 3 },
   cardMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 10 },
-  dueBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#E4F0F6', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4 },
+  dueBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.background, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4 },
   dueText: { fontSize: 11, color: colors.primary, fontWeight: '500' },
-  overdueBadge: { backgroundColor: '#F5D3CE' },
+  overdueBadge: { backgroundColor: colors.background },
   overdueText: { color: colors.error },
   metaBadge: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metaText: { fontSize: 11, color: colors.textSecondary },
   metaTextDone: { color: colors.success },
   addCardBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 12 },
   addCardText: { color: colors.textSecondary, fontSize: 14 },
-  addListBtn: { width: 280, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 6, height: 50 },
-  addListText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  addListBtn: { width: 280, backgroundColor: colors.background, borderRadius: 8, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 6, height: 50 },
+  addListText: { color: colors.textPrimary, fontSize: 15, fontWeight: '500' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalBox: { backgroundColor: colors.surface, borderRadius: 12, padding: 20, width: '100%', maxWidth: 400 },
   modalTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 12 },
@@ -398,13 +408,13 @@ const styles = StyleSheet.create({
   moveItemText: { fontSize: 15, color: colors.textPrimary },
   actionOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   actionDismiss: { flex: 1 },
-  actionSheet: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 36 },
-  actionHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: '#E5E7EB', alignSelf: 'center', marginBottom: 16 },
+  actionSheet: { backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 36 },
+  actionHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: 16 },
   actionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, textAlign: 'center' },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
   actionLabel: { fontSize: 16, color: colors.textPrimary, fontWeight: '500' },
   actionLabelDanger: { color: colors.error },
-  actionDivider: { height: 1, backgroundColor: '#F0F0F0' },
+  actionDivider: { height: 1, backgroundColor: colors.border },
   actionCancelBtn: { marginTop: 12, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 24, backgroundColor: colors.background, borderRadius: 10 },
   actionCancelText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary },
 });

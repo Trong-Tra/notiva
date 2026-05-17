@@ -93,7 +93,7 @@ export default function SupportScreen({ navigation }: any) {
         >
           {messages.length === 0 && (
             <>
-              <Text style={styles.placeholder}>ask notiva anything</Text>
+              <Text style={styles.placeholder}>Ask Notiva Anything</Text>
               <View style={styles.faqWrap}>
                 {FAQS.map((f, i) => (
                   <TouchableOpacity key={i} style={styles.faqChip} onPress={() => sendMessage(f.q)}>

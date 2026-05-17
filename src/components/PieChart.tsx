@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { useTheme } from '../context/ThemeContext';
 
 interface Slice {
   value: number;
@@ -30,6 +31,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
 }
 
 export default function PieChart({ data, size = 140, strokeWidth = 0 }: PieChartProps) {
+  const { colors } = useTheme();
   const total = data.reduce((sum, item) => sum + item.value, 0);
   const cx = size / 2;
   const cy = size / 2;
@@ -53,11 +55,11 @@ export default function PieChart({ data, size = 140, strokeWidth = 0 }: PieChart
         {slices.map((slice, index) => (
           <Path key={index} d={slice.path} fill={slice.color} />
         ))}
-        <Circle cx={cx} cy={cy} r={holeR} fill="#fff" />
+        <Circle cx={cx} cy={cy} r={holeR} fill={colors.background} />
       </Svg>
       <View style={styles.centerLabel}>
-        <Text style={styles.centerPercent}>{completionRate}%</Text>
-        <Text style={styles.centerText}>done</Text>
+        <Text style={[styles.centerPercent, { color: colors.textPrimary }]}>{completionRate}%</Text>
+        <Text style={[styles.centerText, { color: colors.textMuted }]}>done</Text>
       </View>
     </View>
   );
@@ -78,11 +80,9 @@ const styles = StyleSheet.create({
   centerPercent: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#111827',
   },
   centerText: {
     fontSize: 11,
-    color: '#9CA3AF',
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,

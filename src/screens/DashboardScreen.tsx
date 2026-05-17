@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { colors } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import { isOverdue, isToday } from '../utils/helpers';
 
 export default function DashboardScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { space, boards, getStats, getAllCardsWithDueDates } = useApp();
   const stats = getStats();
   const dueCards = getAllCardsWithDueDates();
@@ -81,13 +83,13 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+const getStyles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.borderLight },
   headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   headerSub: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
   scroll: { padding: 20, paddingBottom: 40 },
-  completionCard: { alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 16, padding: 28, borderWidth: 1, borderColor: '#F0F0F0', marginBottom: 24 },
+  completionCard: { alignItems: 'center', backgroundColor: colors.surfaceHover, borderRadius: 16, padding: 28, borderWidth: 1, borderColor: colors.borderLight, marginBottom: 24 },
   circle: { width: 120, height: 120, borderRadius: 60, borderWidth: 8, borderColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   circlePercent: { fontSize: 32, fontWeight: '800', color: colors.primary },
   circleLabel: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
@@ -95,16 +97,16 @@ const styles = StyleSheet.create({
   circleMetaText: { fontSize: 14, color: colors.textSecondary },
   section: { marginBottom: 24 },
   sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
-  card: { backgroundColor: '#F9FAFB', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#F0F0F0' },
-  statRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+  card: { backgroundColor: colors.surfaceHover, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.borderLight },
+  statRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderLight },
   statDot: { width: 8, height: 8, borderRadius: 4, marginRight: 10 },
   statRowLabel: { flex: 1, fontSize: 14, color: colors.textPrimary, fontWeight: '500' },
   statRowValue: { fontSize: 16, fontWeight: '700' },
   emptyText: { color: colors.textMuted, fontSize: 14, textAlign: 'center', paddingVertical: 10 },
-  boardRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+  boardRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderLight },
   boardRowDot: { width: 8, height: 8, borderRadius: 4, marginRight: 10 },
   boardRowTitle: { width: 100, fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
-  boardRowBar: { flex: 1, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, marginHorizontal: 10 },
+  boardRowBar: { flex: 1, height: 6, backgroundColor: colors.border, borderRadius: 3, marginHorizontal: 10 },
   boardRowFill: { height: 6, borderRadius: 3 },
   boardRowPct: { width: 36, fontSize: 13, fontWeight: '700', color: colors.textSecondary, textAlign: 'right' },
 });

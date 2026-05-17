@@ -11,10 +11,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { colors, boardBackgroundColors } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
+import { boardBackgroundColors } from '../constants/colors';
 import { OnboardingScreenProps } from '../types/navigation';
 
 export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { createSpace, completeOnboarding, createBoard, createList, createCard } = useApp();
   const [step, setStep] = useState(1);
   const [spaceName, setSpaceName] = useState('');
@@ -115,26 +118,26 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+const getStyles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
   scroll: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 60, paddingBottom: 40 },
   progress: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 48 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E5E7EB' },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
   dotActive: { backgroundColor: colors.primary, width: 24 },
   step: { alignItems: 'center' },
   iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
   iconText: { fontSize: 24, fontWeight: '800', color: colors.primary },
   title: { fontSize: 28, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 },
   subtitle: { fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: 32, paddingHorizontal: 8 },
-  input: { width: '100%', backgroundColor: '#F9FAFB', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', padding: 16, fontSize: 16, color: colors.textPrimary, marginBottom: 20 },
+  input: { width: '100%', backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 16, fontSize: 16, color: colors.textPrimary, marginBottom: 20 },
   label: { alignSelf: 'flex-start', fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginBottom: 10 },
   colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 28, alignSelf: 'flex-start' },
   colorDot: { width: 36, height: 36, borderRadius: 18 },
-  colorDotActive: { borderWidth: 3, borderColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  colorDotActive: { borderWidth: 3, borderColor: colors.background, shadowColor: colors.textPrimary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
   button: { width: '100%', backgroundColor: colors.primary, paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
-  buttonDisabled: { backgroundColor: '#A0C4E0' },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  buttonDisabled: { backgroundColor: colors.border },
+  buttonText: { color: colors.surface, fontSize: 16, fontWeight: '700' },
   skipBtn: { marginTop: 16, padding: 8 },
   skipText: { color: colors.textMuted, fontSize: 14, fontWeight: '500' },
 });

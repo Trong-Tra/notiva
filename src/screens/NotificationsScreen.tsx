@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { colors } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import { formatDate, isOverdue, isToday } from '../utils/helpers';
 import { NotificationsScreenProps } from '../types/navigation';
 import { Board, Card } from '../types';
 
 export default function NotificationsScreen({ navigation }: NotificationsScreenProps) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { boards, getAllCardsWithDueDates } = useApp();
   const dueCards = getAllCardsWithDueDates();
   const overdue = dueCards.filter((c) => isOverdue(c.dueDate) && !c.isCompleted);
@@ -80,15 +82,15 @@ export default function NotificationsScreen({ navigation }: NotificationsScreenP
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+const getStyles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
   headerTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
   headerSub: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
   scroll: { padding: 20, paddingBottom: 40 },
   section: { marginBottom: 20 },
   sectionLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#F0F0F0' },
+  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: colors.border },
   dot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
   rowBody: { flex: 1 },
   rowTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },

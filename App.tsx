@@ -16,6 +16,7 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import BoardDetailScreen from './src/screens/BoardDetailScreen';
 import CardDetailScreen from './src/screens/CardDetailScreen';
+import SupportScreen from './src/screens/SupportScreen';
 import { RootStackParamList, SpaceStackParamList, TabParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -123,6 +124,7 @@ function RootNavigator() {
       ) : (
         <Stack.Screen name="Main" component={MainTabs} />
       )}
+      <Stack.Screen name="Support" component={SupportScreen} />
     </Stack.Navigator>
   );
 }
